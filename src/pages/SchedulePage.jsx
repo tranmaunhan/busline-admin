@@ -574,7 +574,7 @@ function SchedulePage() {
             </div>
           </div>
 
-          <div className="table-wrap">
+          {/* <div className="table-wrap">
             <table>
               <thead>
                 <tr>
@@ -599,7 +599,7 @@ function SchedulePage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </div> */}
 
           {lastGeneration.skippedReasons?.length ? (
             <ul className="notes-list">

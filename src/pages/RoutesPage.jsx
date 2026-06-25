@@ -753,7 +753,7 @@ function RoutesPage() {
               </table>
             </div>
 
-            <div className="editor-stack">
+            {/* <div className="editor-stack">
               {routesData.routes.map((route) => (
                 <div className="table-inline-actions" key={`route-actions-${route.routeId}`}>
                   <strong>{route.route}</strong>
@@ -775,7 +775,7 @@ function RoutesPage() {
                   </button>
                 </div>
               ))}
-            </div>
+            </div> */}
           </article>
 
           <article className="data-card">
