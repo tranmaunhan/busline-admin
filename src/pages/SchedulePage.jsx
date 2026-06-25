@@ -523,42 +523,7 @@ function SchedulePage() {
               </tbody>
             </table>
 
-            <div className="editor-stack">
-              {tripSchedules.map((schedule) => (
-                <div className="table-inline-actions" key={`schedule-manage-${schedule.id}`}>
-                  <strong>
-                    #{schedule.id} - {schedule.routeName} - {schedule.vehicleLabel}
-                  </strong>
-                  <button
-                    type="button"
-                    disabled={generating}
-                    onClick={() => handleGenerate({
-                      fromDate: generateForm.fromDate,
-                      toDate: generateForm.fromDate,
-                      scheduleIds: [schedule.id],
-                    })}
-                  >
-                    Sinh 1 ngay
-                  </button>
-                  <button
-                    type="button"
-                    className="ghost-button"
-                    disabled={creating || deletingScheduleId === schedule.id}
-                    onClick={() => handleEditSchedule(schedule)}
-                  >
-                    Sua
-                  </button>
-                  <button
-                    type="button"
-                    className="danger-button"
-                    disabled={creating || deletingScheduleId === schedule.id}
-                    onClick={() => handleDeleteSchedule(schedule)}
-                  >
-                    {deletingScheduleId === schedule.id ? 'Dang xoa...' : 'Xoa'}
-                  </button>
-                </div>
-              ))}
-            </div>
+
           </div>
         ) : null}
       </article>
@@ -574,7 +539,7 @@ function SchedulePage() {
             </div>
           </div>
 
-          {/* <div className="table-wrap">
+          <div className="table-wrap">
             <table>
               <thead>
                 <tr>
@@ -599,7 +564,7 @@ function SchedulePage() {
                 ))}
               </tbody>
             </table>
-          </div> */}
+          </div>
 
           {lastGeneration.skippedReasons?.length ? (
             <ul className="notes-list">
