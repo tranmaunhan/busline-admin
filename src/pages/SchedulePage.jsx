@@ -50,6 +50,17 @@ function isActiveSchedule(schedule) {
   return Number(schedule.status) === 1;
 }
 
+function createScheduleFormFromSchedule(schedule) {
+  return {
+    routeId: String(schedule.routeId ?? ''),
+    vehicleId: String(schedule.vehicleId ?? ''),
+    departureTime: formatScheduleTime(schedule.departureTime),
+    startDate: schedule.startDate ?? getLocalDateValue(),
+    endDate: schedule.endDate ?? '',
+    status: String(schedule.status ?? 0),
+  };
+}
+
 function SchedulePage() {
   const [scheduleForm, setScheduleForm] = useState(createScheduleForm);
   const [generateForm, setGenerateForm] = useState(() => ({
@@ -58,6 +69,9 @@ function SchedulePage() {
   }));
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+  const [editingScheduleId, setEditingScheduleId] = useState(null);
+  const [deletingScheduleId, setDeletingScheduleId] = useState(null);
+  const [scheduleFeedback, setScheduleFeedback] = useState('');
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState('');
   const [lastGeneration, setLastGeneration] = useState(null);
@@ -109,27 +123,80 @@ function SchedulePage() {
 
   const activeScheduleCount = tripSchedules.filter(isActiveSchedule).length;
 
-  async function handleCreateSchedule(event) {
+  function resetScheduleEditor() {
+    setScheduleForm(createScheduleForm());
+    setEditingScheduleId(null);
+    setCreateError('');
+    setScheduleFeedback('');
+  }
+
+  async function handleSaveSchedule(event) {
     event.preventDefault();
     setCreating(true);
     setCreateError('');
+    setScheduleFeedback('');
+
+    const isEditing = editingScheduleId !== null;
 
     try {
-      await adminApi.createTripSchedule({
+      const payload = {
         routeId: Number(scheduleForm.routeId),
         vehicleId: Number(scheduleForm.vehicleId),
         departureTime: scheduleForm.departureTime,
         startDate: scheduleForm.startDate,
         endDate: scheduleForm.endDate || null,
         status: Number(scheduleForm.status),
-      });
+      };
+
+      if (isEditing) {
+        await adminApi.updateTripSchedule(editingScheduleId, payload);
+      } else {
+        await adminApi.createTripSchedule(payload);
+      }
 
       setScheduleForm(createScheduleForm());
+      setEditingScheduleId(null);
+      setScheduleFeedback(isEditing ? 'Cap nhat lich chay thanh cong.' : 'Tao lich chay thanh cong.');
       reload();
     } catch (submitError) {
       setCreateError(submitError.message || 'Không tạo được lịch chạy.');
     } finally {
       setCreating(false);
+    }
+  }
+
+  function handleEditSchedule(schedule) {
+    setEditingScheduleId(schedule.id);
+    setCreateError('');
+    setScheduleFeedback('');
+    setScheduleForm(createScheduleFormFromSchedule(schedule));
+  }
+
+  async function handleDeleteSchedule(schedule) {
+    const confirmed = window.confirm(`Ban co chac muon xoa lich #${schedule.id}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingScheduleId(schedule.id);
+    setCreateError('');
+    setScheduleFeedback('');
+
+    try {
+      await adminApi.deleteTripSchedule(schedule.id);
+
+      if (editingScheduleId === schedule.id) {
+        setScheduleForm(createScheduleForm());
+        setEditingScheduleId(null);
+      }
+
+      setScheduleFeedback('Da xoa lich chay mau thanh cong.');
+      reload();
+    } catch (deleteError) {
+      setCreateError(deleteError.message || 'Khong xoa duoc lich chay mau.');
+    } finally {
+      setDeletingScheduleId(null);
     }
   }
 
@@ -167,7 +234,7 @@ function SchedulePage() {
               </div>
             </div>
 
-            <form className="editor-stack" onSubmit={handleCreateSchedule}>
+            <form className="editor-stack" onSubmit={handleSaveSchedule}>
               <div className="schedule-form-grid">
                 <label className="filter-field">
                   <span>Tuyến xe</span>
@@ -247,12 +314,29 @@ function SchedulePage() {
                 </label>
               </div>
 
+              {editingScheduleId ? (
+                <div className="form-note">
+                  Ban dang chinh sua lich da chon. Nhan nut luu de cap nhat thay doi.
+                </div>
+              ) : null}
+
+              {scheduleFeedback ? (
+                <div className="success-banner">
+                  <strong>{scheduleFeedback}</strong>
+                </div>
+              ) : null}
+
               {createError ? <div className="auth-error">{createError}</div> : null}
 
               <div className="stack-actions">
                 <button type="submit" className="auth-submit" disabled={creating}>
                   {creating ? 'Đang tạo lịch...' : 'Tạo lịch chạy'}
                 </button>
+                {editingScheduleId ? (
+                  <button type="button" className="ghost-button" onClick={resetScheduleEditor} disabled={creating}>
+                    Huy chinh sua
+                  </button>
+                ) : null}
               </div>
             </form>
           </section>
@@ -438,6 +522,43 @@ function SchedulePage() {
                 ) : null}
               </tbody>
             </table>
+
+            <div className="editor-stack">
+              {tripSchedules.map((schedule) => (
+                <div className="table-inline-actions" key={`schedule-manage-${schedule.id}`}>
+                  <strong>
+                    #{schedule.id} - {schedule.routeName} - {schedule.vehicleLabel}
+                  </strong>
+                  <button
+                    type="button"
+                    disabled={generating}
+                    onClick={() => handleGenerate({
+                      fromDate: generateForm.fromDate,
+                      toDate: generateForm.fromDate,
+                      scheduleIds: [schedule.id],
+                    })}
+                  >
+                    Sinh 1 ngay
+                  </button>
+                  <button
+                    type="button"
+                    className="ghost-button"
+                    disabled={creating || deletingScheduleId === schedule.id}
+                    onClick={() => handleEditSchedule(schedule)}
+                  >
+                    Sua
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-button"
+                    disabled={creating || deletingScheduleId === schedule.id}
+                    onClick={() => handleDeleteSchedule(schedule)}
+                  >
+                    {deletingScheduleId === schedule.id ? 'Dang xoa...' : 'Xoa'}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         ) : null}
       </article>

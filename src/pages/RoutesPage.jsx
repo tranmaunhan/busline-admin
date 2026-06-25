@@ -33,6 +33,27 @@ function createDefaultForm() {
   };
 }
 
+function createRouteFormFromDetail(routeDetail) {
+  const stops = (routeDetail.stops ?? []).map((stop) => ({
+    locationId: String(stop.locationId ?? ''),
+    distanceFromStartKm: String(stop.distanceFromStartKm ?? 0),
+    estimatedTimeFromStartMinutes: String(stop.estimatedTimeFromStartMinutes ?? 0),
+  }));
+
+  const segmentPrices = (routeDetail.segmentPrices ?? []).map((item) => ({
+    pickupStopOrder: String(item.pickupStopOrder ?? 1),
+    dropoffStopOrder: String(item.dropoffStopOrder ?? 2),
+    price: String(item.price ?? ''),
+  }));
+
+  return {
+    stops: stops.length >= 2 ? stops : createDefaultForm().stops,
+    segmentPrices: segmentPrices.length > 0
+      ? segmentPrices
+      : [{ pickupStopOrder: 1, dropoffStopOrder: 2, price: '' }],
+  };
+}
+
 const LOCATION_TYPE_OPTIONS = [
   { value: 'STATION', label: 'Bến xe' },
   { value: 'STOP', label: 'Điểm đón / trả' },
@@ -84,6 +105,10 @@ function RoutesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [createdRoute, setCreatedRoute] = useState(null);
+  const [editingRouteId, setEditingRouteId] = useState(null);
+  const [loadingRouteId, setLoadingRouteId] = useState(null);
+  const [deletingRouteId, setDeletingRouteId] = useState(null);
+  const [formFeedback, setFormFeedback] = useState('');
   const [availableLocations, setAvailableLocations] = useState([]);
   const [locationDraft, setLocationDraft] = useState(null);
   const [creatingLocation, setCreatingLocation] = useState(false);
@@ -105,6 +130,16 @@ function RoutesPage() {
       })),
     [availableLocations, form.stops],
   );
+
+  function resetRouteEditor() {
+    setForm(createDefaultForm());
+    setSubmitError('');
+    setFormFeedback('');
+    setCreatedRoute(null);
+    setEditingRouteId(null);
+    setLocationDraft(null);
+    setLocationError('');
+  }
 
   function updateStop(index, field, value) {
     setForm((current) => ({
@@ -253,10 +288,13 @@ function RoutesPage() {
     }
   }
 
-  async function handleCreateRoute(event) {
+  async function handleSaveRoute(event) {
     event.preventDefault();
     setSubmitting(true);
     setSubmitError('');
+    setFormFeedback('');
+
+    const isEditing = editingRouteId !== null;
 
     try {
       const payload = {
@@ -272,14 +310,70 @@ function RoutesPage() {
         })),
       };
 
-      const response = await adminApi.createRoute(payload);
+      const response = isEditing
+        ? await adminApi.updateRoute(editingRouteId, payload)
+        : await adminApi.createRoute(payload);
       setCreatedRoute(response);
       setForm(createDefaultForm());
+      setEditingRouteId(null);
+      setLocationDraft(null);
+      setLocationError('');
+      setFormFeedback(isEditing ? 'Cap nhat tuyen thanh cong.' : 'Tao tuyen thanh cong.');
       reload();
     } catch (createError) {
       setSubmitError(createError.message || 'Không tạo được tuyến xe.');
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleEditRoute(routeId) {
+    setLoadingRouteId(routeId);
+    setSubmitError('');
+    setFormFeedback('');
+
+    try {
+      const routeDetail = await adminApi.getRouteDetail(routeId);
+      setEditingRouteId(routeId);
+      setCreatedRoute(routeDetail);
+      setForm(createRouteFormFromDetail(routeDetail));
+      setLocationDraft(null);
+      setLocationError('');
+    } catch (loadError) {
+      setSubmitError(loadError.message || 'Khong tai duoc chi tiet tuyen xe.');
+    } finally {
+      setLoadingRouteId(null);
+    }
+  }
+
+  async function handleDeleteRoute(route) {
+    const confirmed = window.confirm(`Ban co chac muon xoa tuyen ${route.route}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingRouteId(route.routeId);
+    setSubmitError('');
+    setFormFeedback('');
+
+    try {
+      await adminApi.deleteRoute(route.routeId);
+
+      if (editingRouteId === route.routeId || createdRoute?.routeId === route.routeId) {
+        setForm(createDefaultForm());
+        setCreatedRoute(null);
+        setEditingRouteId(null);
+        setLocationDraft(null);
+        setLocationError('');
+      }
+
+      setFormFeedback('Da xoa tuyen thanh cong.');
+      reload();
+    } catch (deleteError) {
+      setSubmitError(deleteError.message || 'Khong xoa duoc tuyen xe.');
+    } finally {
+      setDeletingRouteId(null);
     }
   }
 
@@ -293,7 +387,7 @@ function RoutesPage() {
           </div>
         </div>
 
-        <form className="editor-stack" onSubmit={handleCreateRoute}>
+        <form className="editor-stack" onSubmit={handleSaveRoute}>
           <div className="form-note">
             Điểm dừng đầu tiên sẽ được xem là điểm xuất phát, điểm cuối cùng là điểm đến của tuyến.
           </div>
@@ -514,6 +608,18 @@ function RoutesPage() {
             </div>
           </section>
 
+          {editingRouteId ? (
+            <div className="form-note">
+              Ban dang chinh sua tuyen da chon. Nhan nut luu de cap nhat thay doi.
+            </div>
+          ) : null}
+
+          {formFeedback ? (
+            <div className="success-banner">
+              <strong>{formFeedback}</strong>
+            </div>
+          ) : null}
+
           {submitError ? (
             <div className="auth-error">{submitError}</div>
           ) : null}
@@ -522,6 +628,11 @@ function RoutesPage() {
             <button type="submit" className="auth-submit" disabled={submitting || availableLocations.length === 0}>
               {submitting ? 'Đang tạo tuyến...' : 'Tạo tuyến xe'}
             </button>
+            {editingRouteId ? (
+              <button type="button" className="ghost-button" onClick={resetRouteEditor} disabled={submitting}>
+                Huy chinh sua
+              </button>
+            ) : null}
           </div>
         </form>
       </article>
@@ -640,6 +751,30 @@ function RoutesPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="editor-stack">
+              {routesData.routes.map((route) => (
+                <div className="table-inline-actions" key={`route-actions-${route.routeId}`}>
+                  <strong>{route.route}</strong>
+                  <button
+                    type="button"
+                    className="ghost-button"
+                    onClick={() => handleEditRoute(route.routeId)}
+                    disabled={submitting || deletingRouteId === route.routeId || loadingRouteId === route.routeId}
+                  >
+                    {loadingRouteId === route.routeId ? 'Dang tai...' : 'Sua'}
+                  </button>
+                  <button
+                    type="button"
+                    className="danger-button"
+                    onClick={() => handleDeleteRoute(route)}
+                    disabled={submitting || loadingRouteId === route.routeId || deletingRouteId === route.routeId}
+                  >
+                    {deletingRouteId === route.routeId ? 'Dang xoa...' : 'Xoa'}
+                  </button>
+                </div>
+              ))}
             </div>
           </article>
 

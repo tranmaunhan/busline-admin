@@ -143,6 +143,17 @@ export const adminApi = {
       body: payload,
       signal,
     }),
+  updateTripSchedule: (scheduleId, payload, { signal } = {}) =>
+    apiFetch(`/admin/trip-schedules/${scheduleId}`, {
+      method: 'PUT',
+      body: payload,
+      signal,
+    }),
+  deleteTripSchedule: (scheduleId, { signal } = {}) =>
+    apiFetch(`/admin/trip-schedules/${scheduleId}`, {
+      method: 'DELETE',
+      signal,
+    }),
   generateTripsFromSchedules: (payload, { signal } = {}) =>
     apiFetch('/admin/trip-schedules/generate', {
       method: 'POST',
@@ -155,6 +166,17 @@ export const adminApi = {
     apiFetch('/admin/routes', {
       method: 'POST',
       body: payload,
+      signal,
+    }),
+  updateRoute: (routeId, payload, { signal } = {}) =>
+    apiFetch(`/admin/routes/${routeId}`, {
+      method: 'PUT',
+      body: payload,
+      signal,
+    }),
+  deleteRoute: (routeId, { signal } = {}) =>
+    apiFetch(`/admin/routes/${routeId}`, {
+      method: 'DELETE',
       signal,
     }),
   createLocation: async (payload, { signal } = {}) => {
