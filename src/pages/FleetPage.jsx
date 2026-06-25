@@ -52,7 +52,7 @@ function FleetPage() {
   function startEdit(vehicle) {
     setForm({
       licensePlate: vehicle.code || '',
-      brand: vehicle.brand === 'Chua co hang xe' ? '' : vehicle.brand || '',
+      brand: vehicle.brand === 'Chưa có hãng xe' ? '' : vehicle.brand || '',
       manufactureYear: vehicle.manufactureYear ?? '',
       vehicleTypeId: vehicle.vehicleTypeId ? String(vehicle.vehicleTypeId) : '',
       status: vehicle.rawStatus || 'ACTIVE',
@@ -83,16 +83,16 @@ function FleetPage() {
 
       if (editingVehicleId) {
         await adminApi.updateVehicle(editingVehicleId, payload);
-        setFeedbackMessage('Da cap nhat thong tin xe.');
+        setFeedbackMessage('Đã cập nhật thông tin xe.');
       } else {
         await adminApi.createVehicle(payload);
-        setFeedbackMessage('Da them xe moi vao doi xe.');
+        setFeedbackMessage('Đã thêm xe mới vào đội xe.');
       }
 
       resetForm();
       reload();
     } catch (requestError) {
-      setSubmitError(requestError.message || 'Khong luu duoc thong tin xe.');
+      setSubmitError(requestError.message || 'Không lưu được thông tin xe.');
     } finally {
       setSubmitting(false);
     }
@@ -105,10 +105,10 @@ function FleetPage() {
 
     try {
       await adminApi.updateVehicleStatus(vehicleId, statusDrafts[vehicleId]);
-      setFeedbackMessage('Da cap nhat trang thai xe.');
+      setFeedbackMessage('Đã cập nhật trạng thái xe.');
       reload();
     } catch (requestError) {
-      setStatusError(requestError.message || 'Khong doi duoc trang thai xe.');
+      setStatusError(requestError.message || 'Không đổi được trạng thái xe.');
     } finally {
       setStatusSubmittingId(null);
     }
@@ -118,17 +118,17 @@ function FleetPage() {
     <div className="page-stack">
       {loading ? (
         <div className="empty-state-card">
-          <strong>Dang tai doi xe...</strong>
-          <span>He thong dang tong hop trang thai phuong tien va hoat dong gan nhat.</span>
+          <strong>Đang tải đội xe...</strong>
+          <span>Hệ thống đang tổng hợp trạng thái phương tiện và hoạt động gần nhất.</span>
         </div>
       ) : null}
 
       {error ? (
         <div className="empty-state-card">
-          <strong>Khong tai duoc thong tin doi xe</strong>
+          <strong>Không tải được thông tin đội xe</strong>
           <span>{error}</span>
           <button type="button" onClick={reload}>
-            Thu tai lai
+            Thử tải lại
           </button>
         </div>
       ) : null}
@@ -148,15 +148,15 @@ function FleetPage() {
           <article className="data-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">{editingVehicleId ? 'Chinh sua xe' : 'Them xe'}</p>
-                <h3>{editingVehicleId ? 'Cap nhat thong tin phuong tien' : 'Them phuong tien moi vao doi xe'}</h3>
+                <p className="eyebrow">{editingVehicleId ? 'Chỉnh sửa xe' : 'Thêm xe'}</p>
+                <h3>{editingVehicleId ? 'Cập nhật thông tin phương tiện' : 'Thêm phương tiện mới vào đội xe'}</h3>
               </div>
             </div>
 
             <form className="editor-stack" onSubmit={handleSubmit}>
               <div className="fleet-editor-grid">
                 <label className="filter-field">
-                  <span>Bien so xe</span>
+                  <span>Biển số xe</span>
                   <input
                     className="form-input"
                     type="text"
@@ -168,23 +168,23 @@ function FleetPage() {
                 </label>
 
                 <label className="filter-field">
-                  <span>Loai xe</span>
+                  <span>Loại xe</span>
                   <select
                     value={form.vehicleTypeId}
                     onChange={(event) => updateForm('vehicleTypeId', event.target.value)}
                     required
                   >
-                    <option value="">Chon loai xe</option>
+                    <option value="">Chọn loại xe</option>
                     {vehicleTypes.map((type) => (
                       <option key={type.id} value={type.id}>
-                        {type.name} - {type.totalSeats} ghe
+                        {type.name} - {type.totalSeats} ghế
                       </option>
                     ))}
                   </select>
                 </label>
 
                 <label className="filter-field">
-                  <span>Hang xe</span>
+                  <span>Hãng xe</span>
                   <input
                     className="form-input"
                     type="text"
@@ -195,7 +195,7 @@ function FleetPage() {
                 </label>
 
                 <label className="filter-field">
-                  <span>Nam san xuat</span>
+                  <span>Năm sản xuất</span>
                   <input
                     className="form-input"
                     type="number"
@@ -208,7 +208,7 @@ function FleetPage() {
                 </label>
 
                 <label className="filter-field">
-                  <span>Trang thai</span>
+                  <span>Trạng thái</span>
                   <select
                     value={form.status}
                     onChange={(event) => updateForm('status', event.target.value)}
@@ -229,11 +229,11 @@ function FleetPage() {
               <div className="editor-actions">
                 {editingVehicleId ? (
                   <button type="button" className="ghost-button" onClick={resetForm}>
-                    Huy sua
+                    Hủy sửa
                   </button>
                 ) : null}
                 <button type="submit" className="auth-submit" disabled={submitting}>
-                  {submitting ? 'Dang luu...' : editingVehicleId ? 'Cap nhat xe' : 'Them xe'}
+                  {submitting ? 'Đang lưu...' : editingVehicleId ? 'Cập nhật xe' : 'Thêm xe'}
                 </button>
               </div>
             </form>
@@ -242,8 +242,8 @@ function FleetPage() {
           <article className="data-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">Doi xe</p>
-                <h3>Tinh trang phuong tien va thao tac nhanh</h3>
+                <p className="eyebrow">Đội xe</p>
+                <h3>Tình trạng phương tiện và thao tác nhanh</h3>
               </div>
             </div>
 
@@ -253,14 +253,14 @@ function FleetPage() {
               <table>
                 <thead>
                   <tr>
-                    <th>Bien so</th>
-                    <th>Loai xe</th>
-                    <th>Trang thai</th>
-                    <th>Hoat dong gan nhat</th>
-                    <th>Hang xe</th>
+                    <th>Biển số</th>
+                    <th>Loại xe</th>
+                    <th>Trạng thái</th>
+                    <th>Hoạt động gần nhất</th>
+                    <th>Hãng xe</th>
                     <th>Nam SX</th>
-                    <th>So ghe</th>
-                    <th>Thao tac</th>
+                    <th>Số ghế</th>
+                    <th>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,12 +273,12 @@ function FleetPage() {
                       </td>
                       <td>{row.activityValue}</td>
                       <td>{row.brand}</td>
-                      <td>{row.manufactureYear ?? 'Chua co'}</td>
-                      <td>{row.totalSeats ?? 'Chua ro'}</td>
+                      <td>{row.manufactureYear ?? 'Chưa có'}</td>
+                      <td>{row.totalSeats ?? 'Chưa rõ'}</td>
                       <td>
                         <div className="table-inline-actions">
                           <button type="button" className="ghost-button" onClick={() => startEdit(row)}>
-                            Sua
+                            Sửa
                           </button>
                           <select
                             className="table-inline-select"
@@ -299,7 +299,7 @@ function FleetPage() {
                             disabled={statusSubmittingId === row.vehicleId}
                             onClick={() => handleQuickStatusUpdate(row.vehicleId)}
                           >
-                            {statusSubmittingId === row.vehicleId ? 'Dang doi...' : 'Doi trang thai'}
+                            {statusSubmittingId === row.vehicleId ? 'Đang đổi...' : 'Đổi trạng thái'}
                           </button>
                         </div>
                       </td>
@@ -309,7 +309,7 @@ function FleetPage() {
                   {vehicles.length === 0 ? (
                     <tr>
                       <td colSpan="8">
-                        <div className="empty-slot">Chua co xe nao trong doi xe.</div>
+                        <div className="empty-slot">Chưa có xe nào trong đội xe.</div>
                       </td>
                     </tr>
                   ) : null}

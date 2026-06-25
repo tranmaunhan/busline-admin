@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { adminApi } from '../api/adminApi';
 import { useAdminResource } from '../hooks/useAdminResource';
 
@@ -18,6 +18,36 @@ function createScheduleForm() {
     endDate: '',
     status: '1',
   };
+}
+
+function formatScheduleTime(value) {
+  if (!value) {
+    return '--:--';
+  }
+
+  return String(value).slice(0, 5);
+}
+
+function formatScheduleDate(value, fallback = 'Không giới hạn') {
+  if (!value) {
+    return fallback;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}
+
+function isActiveSchedule(schedule) {
+  return Number(schedule.status) === 1;
 }
 
 function SchedulePage() {
@@ -52,6 +82,32 @@ function SchedulePage() {
   const tripSchedules = data?.tripSchedules ?? [];
   const routeOptions = data?.routesPayload?.routes ?? [];
   const vehicleOptions = data?.fleetPayload?.vehicles ?? [];
+
+  const timetableRows = useMemo(() => {
+    const groupedByTime = new Map();
+
+    tripSchedules.forEach((schedule) => {
+      const time = formatScheduleTime(schedule.departureTime);
+      const currentGroup = groupedByTime.get(time) ?? [];
+
+      currentGroup.push(schedule);
+      groupedByTime.set(time, currentGroup);
+    });
+
+    return [...groupedByTime.entries()]
+      .sort(([leftTime], [rightTime]) => leftTime.localeCompare(rightTime))
+      .map(([time, schedules]) => ({
+        time,
+        schedules: schedules
+          .slice()
+          .sort((left, right) => `${left.routeName}-${left.vehicleLabel}`.localeCompare(
+            `${right.routeName}-${right.vehicleLabel}`,
+            'vi',
+          )),
+      }));
+  }, [tripSchedules]);
+
+  const activeScheduleCount = tripSchedules.filter(isActiveSchedule).length;
 
   async function handleCreateSchedule(event) {
     event.preventDefault();
@@ -94,21 +150,20 @@ function SchedulePage() {
 
   return (
     <div className="page-stack">
-      <article className="data-card schedule-page-card">
-        <div className="schedule-toolbar">
-          <div>
-            <p className="eyebrow">Lịch chạy mẫu</p>
-            <h3>Tạo lịch và sinh chuyến xe tự động</h3>
 
+      <article className="data-card schedule-page-card">
+        {/* <div className="schedule-toolbar">
+          <div>
+            <h3>Sắp xếp lịch trình </h3>
           </div>
-        </div>
+        </div> */}
 
         <div className="schedule-workspace">
           <section className="schedule-panel">
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Tạo lịch</p>
-                <h3>Cấu hình lịch chạy mẫu mới</h3>
+                <h3>Cấu hình lịch hoạt động</h3>
               </div>
             </div>
 
@@ -206,7 +261,7 @@ function SchedulePage() {
             <div className="section-heading">
               <div>
                 <p className="eyebrow">Chạy lịch</p>
-                <h3>Sinh chuyến theo khoảng ngày</h3>
+                <h3>Tạo chuyến xe</h3>
               </div>
             </div>
 
@@ -235,6 +290,7 @@ function SchedulePage() {
 
               <div className="form-note">
                 Hệ thống sẽ đối chiếu các lịch đang hoạt động trong khoảng ngày đã chọn và bỏ qua những chuyến đã tồn tại.
+                Để đảm bảo độ ổn định của hệ thống vui lòng không thêm một lúc nhiều ngày liên tiếp
               </div>
 
               <button
@@ -266,12 +322,19 @@ function SchedulePage() {
           </section>
         </div>
       </article>
-
-      <article className="data-card">
+      <article className="data-card schedule-page-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Danh sách lịch</p>
-            <h3>Các lịch chạy mẫu hiện có</h3>
+            <p className="eyebrow">Thời khóa biểu</p>
+            <h3>Lịch chạy mẫu theo khung giờ</h3>
+            <p className="section-note">
+              Mỗi hàng là một giờ chạy; bên trong là các tuyến và xe đang được cấu hình cho khung giờ đó.
+            </p>
+          </div>
+          <div className="schedule-summary-strip" aria-label="Tổng quan lịch chạy mẫu">
+            <span>{timetableRows.length} khung giờ</span>
+            <span>{activeScheduleCount} lịch hoạt động</span>
+            <span>{tripSchedules.length} lịch mẫu</span>
           </div>
         </div>
 
@@ -293,50 +356,82 @@ function SchedulePage() {
         ) : null}
 
         {!loading && !error ? (
-          <div className="table-wrap">
-            <table>
+          <div className="schedule-timetable-wrap">
+            <table className="schedule-timetable">
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Tuyến</th>
-                  <th>Xe</th>
                   <th>Giờ chạy</th>
-                  <th>Áp dụng từ</th>
-                  <th>Áp dụng đến</th>
+                  <th>Tuyến và xe</th>
+                  <th>Hiệu lực</th>
                   <th>Trạng thái</th>
                   <th>Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {tripSchedules.map((schedule) => (
-                  <tr key={schedule.id}>
-                    <td>{schedule.id}</td>
-                    <td>{schedule.routeName}</td>
-                    <td>{schedule.vehicleLabel}</td>
-                    <td>{schedule.departureTime}</td>
-                    <td>{schedule.startDate}</td>
-                    <td>{schedule.endDate || 'Không giới hạn'}</td>
-                    <td>
-                      <span className="status-pill">{schedule.statusLabel}</span>
+                {timetableRows.map((row) => (
+                  <tr key={row.time}>
+                    <td className="schedule-time-cell">
+                      <strong>{row.time}</strong>
+                      <span>{row.schedules.length} lịch</span>
                     </td>
                     <td>
-                      <button
-                        type="button"
-                        disabled={generating}
-                        onClick={() => handleGenerate({
-                          fromDate: generateForm.fromDate,
-                          toDate: generateForm.fromDate,
-                          scheduleIds: [schedule.id],
-                        })}
-                      >
-                        Sinh cho 1 ngày
-                      </button>
+                      <div className="schedule-route-stack">
+                        {row.schedules.map((schedule) => (
+                          <div className="schedule-route-card" key={schedule.id}>
+                            <div>
+                              <strong>{schedule.routeName}</strong>
+                              <span>{schedule.vehicleLabel}</span>
+                            </div>
+                            <small>#{schedule.id}</small>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="schedule-validity-stack">
+                        {row.schedules.map((schedule) => (
+                          <div key={`validity-${schedule.id}`} className="schedule-validity-item">
+                            <span>{formatScheduleDate(schedule.startDate, 'Chưa có ngày bắt đầu')}</span>
+                            <small>đến {formatScheduleDate(schedule.endDate)}</small>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="schedule-status-stack">
+                        {row.schedules.map((schedule) => (
+                          <span
+                            className={`status-pill${isActiveSchedule(schedule) ? '' : ' inactive'}`}
+                            key={`status-${schedule.id}`}
+                          >
+                            {schedule.statusLabel}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="schedule-action-stack">
+                        {row.schedules.map((schedule) => (
+                          <button
+                            type="button"
+                            key={`generate-${schedule.id}`}
+                            disabled={generating}
+                            onClick={() => handleGenerate({
+                              fromDate: generateForm.fromDate,
+                              toDate: generateForm.fromDate,
+                              scheduleIds: [schedule.id],
+                            })}
+                          >
+                            Sinh 1 ngày
+                          </button>
+                        ))}
+                      </div>
                     </td>
                   </tr>
                 ))}
-                {tripSchedules.length === 0 ? (
+                {timetableRows.length === 0 ? (
                   <tr>
-                    <td colSpan="8">
+                    <td colSpan="5">
                       <div className="empty-slot">Chưa có lịch chạy mẫu nào được tạo.</div>
                     </td>
                   </tr>
@@ -346,6 +441,8 @@ function SchedulePage() {
           </div>
         ) : null}
       </article>
+
+
 
       {lastGeneration?.createdTrips?.length ? (
         <article className="data-card">

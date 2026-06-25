@@ -13,10 +13,10 @@ function AdminLayout() {
       <aside className="sidebar">
         <div>
           <p className="eyebrow">Busline Admin</p>
-          <h1>Quản lý nhà xe thông minh</h1>
-          <p className="sidebar-copy">
+          {/* <h1>Quản lý nhà xe thông minh</h1> */}
+          {/* <p className="sidebar-copy">
             Điều hành vé, chuyến, tuyến và đội xe trong cùng một hệ thống quản trị.
-          </p>
+          </p> */}
         </div>
 
         <nav className="nav-list">

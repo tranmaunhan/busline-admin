@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api';
+import { normalizeVietnameseText, normalizeVietnameseTextInPayload } from '../utils/vietnameseText';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://api.aihost.io.vn/api';
 
 export const ADMIN_AUTH_STORAGE_KEYS = {
   token: 'adminAuthToken',
@@ -47,9 +49,9 @@ async function parseApiResponse(response, fallbackMessage) {
     }
 
     const error = new Error(
-      payload?.message
+      normalizeVietnameseText(payload?.message)
       || (response.status === 401
-          ? 'Bạn cần đăng nhập để tiếp tục.'
+        ? 'Bạn cần đăng nhập để tiếp tục.'
         : response.status === 403
           ? 'Tài khoản này không có quyền truy cập admin.'
           : fallbackMessage)
@@ -59,7 +61,7 @@ async function parseApiResponse(response, fallbackMessage) {
     throw error;
   }
 
-  return payload;
+  return normalizeVietnameseTextInPayload(payload);
 }
 
 async function apiFetch(path, { method = 'GET', body, params, signal, auth = true } = {}) {
@@ -198,4 +200,10 @@ export const adminApi = {
 
 export const publicApi = {
   getLocations: ({ signal } = {}) => apiFetch('/locations', { signal, auth: false }),
+  searchTrips: ({ pickupLocationId, dropoffLocationId, departureDate, signal } = {}) =>
+    apiFetch('/trips/search', {
+      params: { pickupLocationId, dropoffLocationId, departureDate },
+      signal,
+      auth: false,
+    }),
 };
