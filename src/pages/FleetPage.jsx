@@ -1,35 +1,30 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { adminApi } from '../api/adminApi';
 import { useAdminResource } from '../hooks/useAdminResource';
 
-function createVehicleForm() {
-  return {
-    licensePlate: '',
-    brand: '',
-    manufactureYear: '',
-    vehicleTypeId: '',
-    status: 'ACTIVE',
-  };
-}
-
 function FleetPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { data, loading, error, reload } = useAdminResource(
     (signal) => adminApi.getFleet({ signal }),
     [],
   );
 
-  const [form, setForm] = useState(createVehicleForm);
-  const [editingVehicleId, setEditingVehicleId] = useState(null);
-  const [submitError, setSubmitError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [statusDrafts, setStatusDrafts] = useState({});
   const [statusSubmittingId, setStatusSubmittingId] = useState(null);
   const [statusError, setStatusError] = useState('');
 
-  const vehicleTypes = data?.vehicleTypes ?? [];
   const statusOptions = data?.statusOptions ?? [];
   const vehicles = data?.vehicles ?? [];
+
+  useEffect(() => {
+    if (location.state?.feedbackMessage) {
+      setFeedbackMessage(location.state.feedbackMessage);
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     if (!statusOptions.length) {
@@ -42,61 +37,6 @@ function FleetPage() {
       ),
     );
   }, [vehicles, statusOptions]);
-
-  function resetForm() {
-    setForm(createVehicleForm());
-    setEditingVehicleId(null);
-    setSubmitError('');
-  }
-
-  function startEdit(vehicle) {
-    setForm({
-      licensePlate: vehicle.code || '',
-      brand: vehicle.brand === 'Chưa có hãng xe' ? '' : vehicle.brand || '',
-      manufactureYear: vehicle.manufactureYear ?? '',
-      vehicleTypeId: vehicle.vehicleTypeId ? String(vehicle.vehicleTypeId) : '',
-      status: vehicle.rawStatus || 'ACTIVE',
-    });
-    setEditingVehicleId(vehicle.vehicleId);
-    setSubmitError('');
-    setFeedbackMessage('');
-  }
-
-  function updateForm(field, value) {
-    setForm((current) => ({ ...current, [field]: value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setSubmitting(true);
-    setSubmitError('');
-    setFeedbackMessage('');
-
-    try {
-      const payload = {
-        licensePlate: form.licensePlate.trim(),
-        brand: form.brand.trim(),
-        manufactureYear: form.manufactureYear ? Number(form.manufactureYear) : null,
-        vehicleTypeId: Number(form.vehicleTypeId),
-        status: form.status,
-      };
-
-      if (editingVehicleId) {
-        await adminApi.updateVehicle(editingVehicleId, payload);
-        setFeedbackMessage('Đã cập nhật thông tin xe.');
-      } else {
-        await adminApi.createVehicle(payload);
-        setFeedbackMessage('Đã thêm xe mới vào đội xe.');
-      }
-
-      resetForm();
-      reload();
-    } catch (requestError) {
-      setSubmitError(requestError.message || 'Không lưu được thông tin xe.');
-    } finally {
-      setSubmitting(false);
-    }
-  }
 
   async function handleQuickStatusUpdate(vehicleId) {
     setStatusSubmittingId(vehicleId);
@@ -116,6 +56,32 @@ function FleetPage() {
 
   return (
     <div className="page-stack">
+      <article className="data-card">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Đội xe</p>
+            <h3>Danh sách phương tiện đang quản lý</h3>
+            <p className="section-note">
+              Màn hình danh sách chỉ giữ các thao tác cần thiết. Phần thêm và chỉnh sửa đã được tách ra trang riêng để thao tác gọn hơn.
+            </p>
+          </div>
+
+          <div className="editor-actions">
+            <button type="button" className="auth-submit" onClick={() => navigate('/doi-xe/tao-moi')}>
+              Thêm xe
+            </button>
+          </div>
+        </div>
+
+        {feedbackMessage ? (
+          <div className="success-banner">
+            <strong>{feedbackMessage}</strong>
+          </div>
+        ) : null}
+
+        {statusError ? <div className="auth-error">{statusError}</div> : null}
+      </article>
+
       {loading ? (
         <div className="empty-state-card">
           <strong>Đang tải đội xe...</strong>
@@ -148,106 +114,10 @@ function FleetPage() {
           <article className="data-card">
             <div className="section-heading">
               <div>
-                <p className="eyebrow">{editingVehicleId ? 'Chỉnh sửa xe' : 'Thêm xe'}</p>
-                <h3>{editingVehicleId ? 'Cập nhật thông tin phương tiện' : 'Thêm phương tiện mới vào đội xe'}</h3>
-              </div>
-            </div>
-
-            <form className="editor-stack" onSubmit={handleSubmit}>
-              <div className="fleet-editor-grid">
-                <label className="filter-field">
-                  <span>Biển số xe</span>
-                  <input
-                    className="form-input"
-                    type="text"
-                    value={form.licensePlate}
-                    onChange={(event) => updateForm('licensePlate', event.target.value)}
-                    placeholder="51B-12345"
-                    required
-                  />
-                </label>
-
-                <label className="filter-field">
-                  <span>Loại xe</span>
-                  <select
-                    value={form.vehicleTypeId}
-                    onChange={(event) => updateForm('vehicleTypeId', event.target.value)}
-                    required
-                  >
-                    <option value="">Chọn loại xe</option>
-                    {vehicleTypes.map((type) => (
-                      <option key={type.id} value={type.id}>
-                        {type.name} - {type.totalSeats} ghế
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="filter-field">
-                  <span>Hãng xe</span>
-                  <input
-                    className="form-input"
-                    type="text"
-                    value={form.brand}
-                    onChange={(event) => updateForm('brand', event.target.value)}
-                    placeholder="Thaco / Hyundai"
-                  />
-                </label>
-
-                <label className="filter-field">
-                  <span>Năm sản xuất</span>
-                  <input
-                    className="form-input"
-                    type="number"
-                    min="1950"
-                    max="2100"
-                    value={form.manufactureYear}
-                    onChange={(event) => updateForm('manufactureYear', event.target.value)}
-                    placeholder="2024"
-                  />
-                </label>
-
-                <label className="filter-field">
-                  <span>Trạng thái</span>
-                  <select
-                    value={form.status}
-                    onChange={(event) => updateForm('status', event.target.value)}
-                    required
-                  >
-                    {statusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              {submitError ? <div className="auth-error">{submitError}</div> : null}
-              {feedbackMessage ? <div className="success-banner"><strong>{feedbackMessage}</strong></div> : null}
-
-              <div className="editor-actions">
-                {editingVehicleId ? (
-                  <button type="button" className="ghost-button" onClick={resetForm}>
-                    Hủy sửa
-                  </button>
-                ) : null}
-                <button type="submit" className="auth-submit" disabled={submitting}>
-                  {submitting ? 'Đang lưu...' : editingVehicleId ? 'Cập nhật xe' : 'Thêm xe'}
-                </button>
-              </div>
-            </form>
-          </article>
-
-          <article className="data-card">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Đội xe</p>
+                <p className="eyebrow">Phương tiện</p>
                 <h3>Tình trạng phương tiện và thao tác nhanh</h3>
               </div>
             </div>
-
-            {statusError ? <div className="auth-error">{statusError}</div> : null}
 
             <div className="table-wrap">
               <table>
@@ -258,9 +128,9 @@ function FleetPage() {
                     <th>Trạng thái</th>
                     <th>Hoạt động gần nhất</th>
                     <th>Hãng xe</th>
-                    <th>Nam SX</th>
+                    <th>Năm SX</th>
                     <th>Số ghế</th>
-                    <th>Thao tác</th>
+                    <th>Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -277,7 +147,11 @@ function FleetPage() {
                       <td>{row.totalSeats ?? 'Chưa rõ'}</td>
                       <td>
                         <div className="table-inline-actions">
-                          <button type="button" className="ghost-button" onClick={() => startEdit(row)}>
+                          <button
+                            type="button"
+                            className="ghost-button"
+                            onClick={() => navigate(`/doi-xe/${row.vehicleId}/chinh-sua`)}
+                          >
                             Sửa
                           </button>
                           <select

@@ -7,9 +7,9 @@ function BookingPage() {
   return (
     <div className="page-stack">
       <TripTimetableBrowser
-        eyebrow="Dat ve"
-        title="Thoi khoa bieu dat ve"
-        description="Chon ngay, diem di va diem den de tim chuyen phu hop. Luong booking hien da ho tro khach vang lai nhap thong tin lien he, email nhan ve dien tu va giu cho theo han thanh toan."
+        eyebrow="Đặt vé"
+        title="Thời khóa biểu đặt vé"
+        description="Chọn ngày, điểm đi và điểm đến để tìm chuyến phù hợp. Luồng booking hiện đã hỗ trợ khách vãng lai nhập thông tin liên hệ, email nhận vé điện tử và giữ chỗ theo hạn thanh toán."
         onSelectTrip={(trip, context) => {
           navigate(`/dat-ve/chuyen/${trip.tripId}`, {
             state: {

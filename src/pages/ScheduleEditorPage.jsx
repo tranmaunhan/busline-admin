@@ -89,16 +89,19 @@ function ScheduleEditorPage() {
 
       if (isEditing) {
         await adminApi.updateTripSchedule(scheduleId, payload);
-        setFeedbackMessage('Cap nhat lich chay thanh cong.');
+        navigate('/lich-chay', {
+          replace: true,
+          state: { feedbackMessage: 'Đã cập nhật lịch chạy thành công.' },
+        });
       } else {
         await adminApi.createTripSchedule(payload);
-        setFeedbackMessage('Tao lich chay thanh cong.');
-        setForm(createScheduleForm());
+        navigate('/lich-chay', {
+          replace: true,
+          state: { feedbackMessage: 'Đã tạo lịch chạy thành công.' },
+        });
       }
-
-      reload();
     } catch (requestError) {
-      setSubmitError(requestError.message || 'Khong luu duoc lich chay.');
+      setSubmitError(requestError.message || 'Không lưu được lịch chạy.');
     } finally {
       setSubmitting(false);
     }
@@ -109,7 +112,7 @@ function ScheduleEditorPage() {
       return;
     }
 
-    const confirmed = window.confirm(`Ban co chac muon xoa lich #${scheduleId} khong?`);
+    const confirmed = window.confirm(`Bạn có chắc muốn xóa lịch #${scheduleId} không?`);
     if (!confirmed) {
       return;
     }
@@ -122,10 +125,10 @@ function ScheduleEditorPage() {
       await adminApi.deleteTripSchedule(scheduleId);
       navigate('/lich-chay', {
         replace: true,
-        state: { feedbackMessage: 'Da xoa lich chay mau thanh cong.' },
+        state: { feedbackMessage: 'Đã xóa lịch chạy mẫu thành công.' },
       });
     } catch (requestError) {
-      setSubmitError(requestError.message || 'Khong xoa duoc lich chay.');
+      setSubmitError(requestError.message || 'Không xóa được lịch chạy.');
     } finally {
       setDeleting(false);
     }
@@ -136,20 +139,20 @@ function ScheduleEditorPage() {
       <article className="data-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">{isEditing ? 'Chinh sua lich' : 'Tao lich moi'}</p>
-            <h3>{isEditing ? 'Cap nhat thong tin lich chay' : 'Tao lich chay mau moi'}</h3>
+            <p className="eyebrow">{isEditing ? 'Chỉnh sửa lịch' : 'Tạo lịch mới'}</p>
+            <h3>{isEditing ? 'Cập nhật thông tin lịch chạy' : 'Tạo lịch chạy mẫu mới'}</h3>
             <p className="section-note">
-              Chon tuyen, xe, gio khoi hanh va khoang hieu luc. Moi thong tin duoc load san tu co so du lieu de admin chon nhanh.
+              Chọn tuyến, xe, giờ khởi hành và khoảng hiệu lực. Mọi thông tin được load sẵn từ cơ sở dữ liệu để admin chọn nhanh.
             </p>
           </div>
 
           <div className="editor-actions">
             <button type="button" className="ghost-button" onClick={() => navigate('/lich-chay')}>
-              Quay lai lich chay
+              Quay lại lịch chạy
             </button>
             {isEditing ? (
               <button type="button" className="danger-button" onClick={handleDelete} disabled={deleting}>
-                {deleting ? 'Dang xoa...' : 'Xoa lich'}
+                {deleting ? 'Đang xóa...' : 'Xóa lịch'}
               </button>
             ) : null}
           </div>
@@ -157,17 +160,17 @@ function ScheduleEditorPage() {
 
         {loading ? (
           <div className="empty-state-card">
-            <strong>Dang tai du lieu lich chay...</strong>
-            <span>He thong dang lay danh sach tuyen, xe va chi tiet lich can chinh sua.</span>
+            <strong>Đang tải dữ liệu lịch chạy...</strong>
+            <span>Hệ thống đang lấy danh sách tuyến, xe và chi tiết lịch cần chỉnh sửa.</span>
           </div>
         ) : null}
 
         {error ? (
           <div className="empty-state-card">
-            <strong>Khong tai duoc thong tin lich chay</strong>
+            <strong>Không tải được thông tin lịch chạy</strong>
             <span>{error}</span>
             <button type="button" onClick={reload}>
-              Thu tai lai
+              Thử tải lại
             </button>
           </div>
         ) : null}
@@ -177,19 +180,19 @@ function ScheduleEditorPage() {
             {selectedSchedule ? (
               <div className="schedule-editor-summary">
                 <div>
-                  <span>Lich hien tai</span>
+                  <span>Lịch hiện tại</span>
                   <strong>#{selectedSchedule.id} - {selectedSchedule.routeName}</strong>
                 </div>
                 <div>
-                  <span>Gio chay</span>
+                  <span>Giờ chạy</span>
                   <strong>{formatScheduleTime(selectedSchedule.departureTime)}</strong>
                 </div>
                 <div>
-                  <span>Hieu luc</span>
+                  <span>Hiệu lực</span>
                   <strong>
-                    {formatScheduleDate(selectedSchedule.startDate, 'Chua co')}
-                    {' '}den{' '}
-                    {formatScheduleDate(selectedSchedule.endDate, 'Khong gioi han')}
+                    {formatScheduleDate(selectedSchedule.startDate, 'Chưa có')}
+                    {' '}đến{' '}
+                    {formatScheduleDate(selectedSchedule.endDate, 'Không giới hạn')}
                   </strong>
                 </div>
               </div>
@@ -197,13 +200,13 @@ function ScheduleEditorPage() {
 
             <div className="schedule-form-grid">
               <label className="filter-field">
-                <span>Tuyen xe</span>
+                <span>Tuyến xe</span>
                 <select
                   value={form.routeId}
                   onChange={(event) => updateForm('routeId', event.target.value)}
                   required
                 >
-                  <option value="">Chon tuyen</option>
+                  <option value="">Chọn tuyến</option>
                   {routeOptions.map((route) => (
                     <option key={route.routeId} value={route.routeId}>
                       {route.route}
@@ -219,7 +222,7 @@ function ScheduleEditorPage() {
                   onChange={(event) => updateForm('vehicleId', event.target.value)}
                   required
                 >
-                  <option value="">Chon xe</option>
+                  <option value="">Chọn xe</option>
                   {vehicleSelectOptions.map((vehicle) => (
                     <option key={vehicle.value} value={vehicle.value}>
                       {vehicle.label}
@@ -229,7 +232,7 @@ function ScheduleEditorPage() {
               </label>
 
               <label className="filter-field">
-                <span>Gio khoi hanh</span>
+                <span>Giờ khởi hành</span>
                 <input
                   className="form-input"
                   type="time"
@@ -240,20 +243,20 @@ function ScheduleEditorPage() {
               </label>
 
               <label className="filter-field">
-                <span>Trang thai</span>
+                <span>Trạng thái</span>
                 <select
                   value={form.status}
                   onChange={(event) => updateForm('status', event.target.value)}
                 >
-                  <option value="1">Dang hoat dong</option>
-                  <option value="0">Ngung hoat dong</option>
+                  <option value="1">Đang hoạt động</option>
+                  <option value="0">Ngừng hoạt động</option>
                 </select>
               </label>
             </div>
 
             <div className="schedule-form-grid schedule-form-grid-compact">
               <label className="filter-field">
-                <span>Ngay bat dau</span>
+                <span>Ngày bắt đầu</span>
                 <input
                   className="form-input"
                   type="date"
@@ -264,7 +267,7 @@ function ScheduleEditorPage() {
               </label>
 
               <label className="filter-field">
-                <span>Ngay ket thuc</span>
+                <span>Ngày kết thúc</span>
                 <input
                   className="form-input"
                   type="date"
@@ -284,10 +287,10 @@ function ScheduleEditorPage() {
 
             <div className="editor-actions">
               <button type="button" className="ghost-button" onClick={resetForm} disabled={submitting}>
-                Dat lai
+                Đặt lại
               </button>
               <button type="submit" className="auth-submit" disabled={submitting}>
-                {submitting ? 'Dang luu...' : isEditing ? 'Luu thay doi' : 'Tao lich'}
+                {submitting ? 'Đang lưu...' : isEditing ? 'Lưu thay đổi' : 'Tạo lịch'}
               </button>
             </div>
           </form>

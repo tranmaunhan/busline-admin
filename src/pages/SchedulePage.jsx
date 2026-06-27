@@ -68,7 +68,7 @@ function SchedulePage() {
   }, [tripSchedules]);
 
   async function handleDeleteSchedule(schedule) {
-    const confirmed = window.confirm(`Ban co chac muon xoa lich #${schedule.id} khong?`);
+    const confirmed = window.confirm(`Bạn có chắc muốn xóa lịch #${schedule.id} không?`);
     if (!confirmed) {
       return;
     }
@@ -79,10 +79,10 @@ function SchedulePage() {
 
     try {
       await adminApi.deleteTripSchedule(schedule.id);
-      setScheduleFeedback('Da xoa lich chay mau thanh cong.');
+      setScheduleFeedback('Đã xóa lịch chạy mẫu thành công.');
       reload();
     } catch (deleteError) {
-      setScheduleError(deleteError.message || 'Khong xoa duoc lich chay mau.');
+      setScheduleError(deleteError.message || 'Không xóa được lịch chạy mẫu.');
     } finally {
       setDeletingScheduleId(null);
     }
@@ -96,10 +96,10 @@ function SchedulePage() {
     try {
       const result = await adminApi.generateTripsFromSchedules(payload);
       setLastGeneration(result);
-      setScheduleFeedback(`Da xu ly ${result.schedulesProcessed} lich va tao ${result.tripsCreated} chuyen.`);
+      setScheduleFeedback(`Đã xử lý ${result.schedulesProcessed} lịch và tạo ${result.tripsCreated} chuyến.`);
       reload();
     } catch (submitError) {
-      setGenerateError(submitError.message || 'Khong sinh duoc chuyen xe.');
+      setGenerateError(submitError.message || 'Không sinh được chuyến xe.');
     } finally {
       setGenerating(false);
     }
@@ -110,10 +110,10 @@ function SchedulePage() {
       <article className="data-card schedule-page-card">
         <div className="section-heading">
           <div>
-            <p className="eyebrow">Lich chay</p>
-            <h3>Thoi khoa bieu lich chay mau</h3>
+            <p className="eyebrow">Lịch chạy</p>
+            <h3>Thời khóa biểu lịch chạy mẫu</h3>
             <p className="section-note">
-              Xem nhanh lich theo khung gio, chon sua de cap nhat thong tin lich hoac xoa lich khong con su dung.
+              Xem nhanh lịch theo khung giờ, chọn sửa để cập nhật thông tin lịch hoặc xóa lịch không còn sử dụng.
             </p>
           </div>
 
@@ -123,22 +123,22 @@ function SchedulePage() {
               className="auth-submit"
               onClick={() => navigate('/lich-chay/tao-moi')}
             >
-              Tao moi
+              Tạo mới
             </button>
           </div>
         </div>
 
         <div className="schedule-generator-card">
           <div>
-            <strong>Sinh chuyen tu lich</strong>
+            <strong>Sinh chuyến từ lịch</strong>
             <span>
-              Chon khoang ngay de sinh `Trips` tu cac lich dang hoat dong. He thong se bo qua nhung chuyen da ton tai.
+              Chọn khoảng ngày để sinh `Trips` từ các lịch đang hoạt động. Hệ thống sẽ bỏ qua những chuyến đã tồn tại.
             </span>
           </div>
 
           <div className="schedule-generator-controls">
             <label className="filter-field">
-              <span>Tu ngay</span>
+              <span>Từ ngày</span>
               <input
                 className="form-input"
                 type="date"
@@ -148,7 +148,7 @@ function SchedulePage() {
             </label>
 
             <label className="filter-field">
-              <span>Den ngay</span>
+              <span>Đến ngày</span>
               <input
                 className="form-input"
                 type="date"
@@ -167,15 +167,15 @@ function SchedulePage() {
                 scheduleIds: [],
               })}
             >
-              {generating ? 'Dang sinh chuyen...' : 'Sinh tat ca lich dang hoat dong'}
+              {generating ? 'Đang sinh chuyến...' : 'Sinh tất cả lịch đang hoạt động'}
             </button>
           </div>
         </div>
 
-        <div className="schedule-summary-strip" aria-label="Tong quan lich chay mau">
-          <span>{timetableColumns.length} khung gio</span>
-          <span>{activeScheduleCount} lich hoat dong</span>
-          <span>{tripSchedules.length} lich mau</span>
+        <div className="schedule-summary-strip" aria-label="Tổng quan lịch chạy mẫu">
+          <span>{timetableColumns.length} khung giờ</span>
+          <span>{activeScheduleCount} lịch hoạt động</span>
+          <span>{tripSchedules.length} lịch mẫu</span>
         </div>
 
         {scheduleFeedback ? (
@@ -189,17 +189,17 @@ function SchedulePage() {
 
         {loading ? (
           <div className="empty-state-card">
-            <strong>Dang tai lich chay mau...</strong>
-            <span>He thong dang doc du lieu lich chay va thong tin xe/tuyen.</span>
+            <strong>Đang tải lịch chạy mẫu...</strong>
+            <span>Hệ thống đang đọc dữ liệu lịch chạy và thông tin xe/tuyến.</span>
           </div>
         ) : null}
 
         {error ? (
           <div className="empty-state-card">
-            <strong>Khong tai duoc lich chay mau</strong>
+            <strong>Không tải được lịch chạy mẫu</strong>
             <span>{error}</span>
             <button type="button" onClick={reload}>
-              Thu tai lai
+              Thử tải lại
             </button>
           </div>
         ) : null}
@@ -221,7 +221,7 @@ function SchedulePage() {
                           <div className="timetable-topline">
                             <div>
                               <div className="timetable-time">{formatScheduleTime(schedule.departureTime)}</div>
-                              <small className="dropoff-time">Lich #{schedule.id}</small>
+                              <small className="dropoff-time">Lịch #{schedule.id}</small>
                             </div>
 
                             <span className={`mini-status${isActiveSchedule(schedule) ? '' : ' expired'}`}>
@@ -236,12 +236,12 @@ function SchedulePage() {
 
                           <div className="timetable-meta">
                             <div>
-                              <span>Ngay bat dau</span>
-                              <strong>{formatScheduleDate(schedule.startDate, 'Chua co')}</strong>
+                              <span>Ngày bắt đầu</span>
+                              <strong>{formatScheduleDate(schedule.startDate, 'Chưa có')}</strong>
                             </div>
                             <div>
-                              <span>Ngay ket thuc</span>
-                              <strong>{formatScheduleDate(schedule.endDate, 'Khong gioi han')}</strong>
+                              <span>Ngày kết thúc</span>
+                              <strong>{formatScheduleDate(schedule.endDate, 'Không giới hạn')}</strong>
                             </div>
                           </div>
 
@@ -251,11 +251,11 @@ function SchedulePage() {
                               className="secondary-button"
                               onClick={() => navigate(`/lich-chay/${schedule.id}/chinh-sua`)}
                             >
-                              Sua thong tin
+                              Sửa thông tin
                             </button>
 
                             <label className="filter-field schedule-inline-date">
-                              <span>Ngay can sinh</span>
+                              <span>Ngày cần sinh</span>
                               <input
                                 className="form-input"
                                 type="date"
@@ -276,7 +276,7 @@ function SchedulePage() {
                               })}
                               disabled={generating}
                             >
-                              Sinh 1 ngay
+                              Sinh 1 ngày
                             </button>
 
                             <button
@@ -285,13 +285,13 @@ function SchedulePage() {
                               onClick={() => handleDeleteSchedule(schedule)}
                               disabled={deletingScheduleId === schedule.id}
                             >
-                              {deletingScheduleId === schedule.id ? 'Dang xoa...' : 'Xoa'}
+                              {deletingScheduleId === schedule.id ? 'Đang xóa...' : 'Xóa'}
                             </button>
                           </div>
                         </article>
                       ))
                     ) : (
-                      <div className="empty-slot">Khong co lich nao trong khung gio nay.</div>
+                      <div className="empty-slot">Không có lịch nào trong khung giờ này.</div>
                     )}
                   </div>
                 </section>
@@ -299,8 +299,8 @@ function SchedulePage() {
             </div>
           ) : (
             <div className="empty-state-card">
-              <strong>Chua co lich chay mau nao duoc tao</strong>
-              <span>Nhan nut `Tao moi` de cau hinh lich moi cho tuyen va xe.</span>
+              <strong>Chưa có lịch chạy mẫu nào được tạo</strong>
+              <span>Nhấn nút `Tạo mới` để cấu hình lịch mới cho tuyến và xe.</span>
             </div>
           )
         ) : null}
@@ -310,8 +310,8 @@ function SchedulePage() {
         <article className="data-card">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">Chuyen vua sinh</p>
-              <h3>Ket qua lan chay lich gan nhat</h3>
+              <p className="eyebrow">Chuyến vừa sinh</p>
+              <h3>Kết quả lần chạy lịch gần nhất</h3>
             </div>
           </div>
 
@@ -319,12 +319,12 @@ function SchedulePage() {
             <table>
               <thead>
                 <tr>
-                  <th>Lich</th>
+                  <th>Lịch</th>
                   <th>Trip ID</th>
-                  <th>Tuyen</th>
+                  <th>Tuyến</th>
                   <th>Xe</th>
-                  <th>Khoi hanh</th>
-                  <th>So ghe</th>
+                  <th>Khởi hành</th>
+                  <th>Số ghế</th>
                 </tr>
               </thead>
               <tbody>

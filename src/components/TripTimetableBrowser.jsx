@@ -3,10 +3,10 @@ import { adminApi, publicApi } from '../api/adminApi';
 import { useAdminResource } from '../hooks/useAdminResource';
 
 const TIME_SLOTS = [
-  { slot: 'Sang', subtitle: '00:00 - 10:59', from: 0, to: 10 },
-  { slot: 'Trua', subtitle: '11:00 - 13:59', from: 11, to: 13 },
-  { slot: 'Chieu', subtitle: '14:00 - 17:59', from: 14, to: 17 },
-  { slot: 'Toi', subtitle: '18:00 - 23:59', from: 18, to: 23 },
+  { slot: 'Sáng', subtitle: '00:00 - 10:59', from: 0, to: 10 },
+  { slot: 'Trưa', subtitle: '11:00 - 13:59', from: 11, to: 13 },
+  { slot: 'Chiều', subtitle: '14:00 - 17:59', from: 14, to: 17 },
+  { slot: 'Tối', subtitle: '18:00 - 23:59', from: 18, to: 23 },
 ];
 
 function getLocalDateValue(date = new Date()) {
@@ -65,21 +65,21 @@ function formatDuration(minutes) {
   const safeMinutes = Number(minutes || 0);
 
   if (!safeMinutes) {
-    return 'Chua ro';
+    return 'Chưa rõ';
   }
 
   const hours = Math.floor(safeMinutes / 60);
   const remainingMinutes = safeMinutes % 60;
 
   if (!hours) {
-    return `${remainingMinutes} phut`;
+    return `${remainingMinutes} phút`;
   }
 
   if (!remainingMinutes) {
-    return `${hours} gio`;
+    return `${hours} giờ`;
   }
 
-  return `${hours} gio ${remainingMinutes} phut`;
+  return `${hours} giờ ${remainingMinutes} phút`;
 }
 
 function buildDateOptions(totalDays = 21) {
@@ -92,7 +92,7 @@ function buildDateOptions(totalDays = 21) {
 
     return {
       id,
-      label: index === 0 ? 'Hom nay' : index === 1 ? 'Ngay mai' : date.toLocaleDateString('vi-VN', { weekday: 'short' }),
+      label: index === 0 ? 'Hôm nay' : index === 1 ? 'Ngày mai' : date.toLocaleDateString('vi-VN', { weekday: 'short' }),
       dateText: formatDateText(date),
     };
   });
@@ -150,7 +150,7 @@ function normalizeSearchTrip(trip) {
     destination: trip.dropoffLocationName || trip.routeDestination,
     routeName: `${trip.routeOrigin} - ${trip.routeDestination}`,
     emptySeats: Number(trip.availableSeats || 0),
-    plate: trip.licensePlate || 'Dang cap nhat',
+    plate: trip.licensePlate || 'Đang cập nhật',
     vehicleType: trip.vehicleType,
     price: trip.price,
     duration: trip.segmentDurationMinutes,
@@ -182,8 +182,8 @@ function normalizeSearchPayload({ selectedDate, locations, trips }) {
 
   return {
     selectedDate,
-    heading: `Lich dat ve ${formatDateHeading(selectedDate)}`,
-    summary: `${normalizedTrips.length} chuyen phu hop voi diem don/tra da chon.`,
+    heading: `Lịch đặt vé ${formatDateHeading(selectedDate)}`,
+    summary: `${normalizedTrips.length} chuyến phù hợp với điểm đón/trả đã chọn.`,
     days: buildDateOptions(),
     locations,
     columns: groupSearchTripsBySlot(normalizedTrips),
@@ -207,9 +207,9 @@ function LockIcon() {
 }
 
 function TripTimetableBrowser({
-  eyebrow = 'Thoi khoa bieu chuyen da sinh',
-  title = 'Xem lich xe theo tung ngay va tung khung gio',
-  description = 'Hien thi gio chay, tuyen, so ghe trong va bien so xe cho tung chuyen.',
+  eyebrow = 'Thời khóa biểu chuyến đã sinh',
+  title = 'Xem lịch xe theo từng ngày và từng khung giờ',
+  description = 'Hiển thị giờ chạy, tuyến, số ghế trống và biển số xe cho từng chuyến.',
   onSelectTrip,
 }) {
   const dateOptions = useMemo(() => buildDateOptions(), []);
@@ -259,9 +259,17 @@ function TripTimetableBrowser({
 
   return (
     <article className="data-card schedule-page-card">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">{eyebrow}</p>
+          <h3>{title}</h3>
+          <p className="section-note">{description}</p>
+        </div>
+      </div>
+
       <div className="schedule-toolbar">
         <label className="date-input-field">
-          <span>Chon ngay</span>
+          <span>Chọn ngày</span>
           <input
             type="date"
             value={selectedDate}
@@ -271,7 +279,7 @@ function TripTimetableBrowser({
         </label>
       </div>
 
-      <div className="date-selector scrollable" role="tablist" aria-label="Chon ngay xem lich">
+      <div className="date-selector scrollable" role="tablist" aria-label="Chọn ngày xem lịch">
         {dateOptions.map((day) => (
           <button
             key={day.id}
@@ -287,9 +295,9 @@ function TripTimetableBrowser({
 
       <div className="route-filter-bar">
         <label className="filter-field">
-          <span>Diem di</span>
+          <span>Điểm đi</span>
           <select value={selectedOrigin} onChange={(event) => setSelectedOrigin(event.target.value)}>
-            <option value="all">Tat ca diem di</option>
+            <option value="all">Tất cả điểm đi</option>
             {(data?.locations ?? []).map((location) => (
               <option key={`origin-${location.id}`} value={location.id}>
                 {location.name}
@@ -299,12 +307,12 @@ function TripTimetableBrowser({
         </label>
 
         <label className="filter-field">
-          <span>Diem den</span>
+          <span>Điểm đến</span>
           <select
             value={selectedDestination}
             onChange={(event) => setSelectedDestination(event.target.value)}
           >
-            <option value="all">Tat ca diem den</option>
+            <option value="all">Tất cả điểm đến</option>
             {(data?.locations ?? []).map((location) => (
               <option key={`destination-${location.id}`} value={location.id}>
                 {location.name}
@@ -321,37 +329,37 @@ function TripTimetableBrowser({
             setSelectedDestination('all');
           }}
         >
-          Xoa loc
+          Xóa lọc
         </button>
       </div>
 
       {canSearchBySegment ? (
         <div className="selected-day-banner segment-search-banner">
-          <strong>Tim theo diem doc tuyen</strong>
-          <span>Dang dung API dat ve cua trang nguoi dung de tim dung chang don/tra.</span>
+          <strong>Tìm theo điểm dọc tuyến</strong>
+          <span>Đang dùng API đặt vé của trang người dùng để tìm đúng chặng đón/trả.</span>
         </div>
       ) : null}
 
       {isSameLocation ? (
         <div className="empty-state-card">
-          <strong>Diem di va diem den khong duoc trung nhau</strong>
-          <span>Chon hai diem khac nhau de tim chuyen dat ve.</span>
+          <strong>Điểm đi và điểm đến không được trùng nhau</strong>
+          <span>Chọn hai điểm khác nhau để tìm chuyến đặt vé.</span>
         </div>
       ) : null}
 
       {loading ? (
         <div className="empty-state-card">
-          <strong>Dang tai lich chay...</strong>
-          <span>He thong dang tong hop du lieu chuyen xe theo ngay da chon.</span>
+          <strong>Đang tải lịch chạy...</strong>
+          <span>Hệ thống đang tổng hợp dữ liệu chuyến xe theo ngày đã chọn.</span>
         </div>
       ) : null}
 
       {error ? (
         <div className="empty-state-card">
-          <strong>Khong tai duoc lich chay</strong>
+          <strong>Không tải được lịch chạy</strong>
           <span>{error}</span>
           <button type="button" onClick={reload}>
-            Thu tai lai
+            Thử tải lại
           </button>
         </div>
       ) : null}
@@ -409,7 +417,7 @@ function TripTimetableBrowser({
                               <div>
                                 <div className="timetable-time">{trip.time}</div>
                                 {trip.dropoffTimeText ? (
-                                  <small className="dropoff-time">Den {trip.dropoffTimeText}</small>
+                                  <small className="dropoff-time">Đến {trip.dropoffTimeText}</small>
                                 ) : null}
                               </div>
 
@@ -417,10 +425,10 @@ function TripTimetableBrowser({
                                 {isExpired ? (
                                   <>
                                     <LockIcon />
-                                    Da qua gio
+                                    Đã qua giờ
                                   </>
                                 ) : (
-                                  `${trip.emptySeats} ghe trong`
+                                  `${trip.emptySeats} ghế trống`
                                 )}
                               </span>
                             </div>
@@ -429,27 +437,27 @@ function TripTimetableBrowser({
                               <strong>
                                 {trip.origin} - {trip.destination}
                               </strong>
-                              {trip.routeName ? <small>Tuyen goc: {trip.routeName}</small> : null}
+                              {trip.routeName ? <small>Tuyến gốc: {trip.routeName}</small> : null}
                             </div>
 
                             <div className="timetable-meta">
                               <div>
-                                <span>Bien so xe</span>
+                                <span>Biển số xe</span>
                                 <strong>{trip.plate}</strong>
                               </div>
                               <div>
-                                <span>{trip.price ? 'Gia ve' : 'Ghe con trong'}</span>
+                                <span>{trip.price ? 'Giá vé' : 'Ghế còn trống'}</span>
                                 <strong>{trip.price ? formatCurrency(trip.price) : trip.emptySeats}</strong>
                               </div>
                               {trip.vehicleType ? (
                                 <div>
-                                  <span>Loai xe</span>
+                                  <span>Loại xe</span>
                                   <strong>{trip.vehicleType}</strong>
                                 </div>
                               ) : null}
                               {trip.duration ? (
                                 <div>
-                                  <span>Thoi gian</span>
+                                  <span>Thời gian</span>
                                   <strong>{formatDuration(trip.duration)}</strong>
                                 </div>
                               ) : null}
@@ -464,13 +472,13 @@ function TripTimetableBrowser({
                                 handleSelectTrip();
                               }}
                             >
-                              {isExpired ? 'Khong the dat chuyen da qua gio' : isSoldOut ? 'Het ghe' : 'Chon chuyen'}
+                              {isExpired ? 'Không thể đặt chuyến đã qua giờ' : isSoldOut ? 'Hết ghế' : 'Chọn chuyến'}
                             </button>
                           </article>
                         );
                       })
                     ) : (
-                      <div className="empty-slot">Khong co chuyen phu hop trong khung gio nay.</div>
+                      <div className="empty-slot">Không có chuyến phù hợp trong khung giờ này.</div>
                     )}
                   </div>
                 </section>
@@ -478,8 +486,8 @@ function TripTimetableBrowser({
             </div>
           ) : (
             <div className="empty-state-card">
-              <strong>Khong tim thay chuyen phu hop</strong>
-              <span>Hay doi ngay hoac bo loc diem di/diem den de xem cac chuyen khac.</span>
+              <strong>Không tìm thấy chuyến phù hợp</strong>
+              <span>Hãy đổi ngày hoặc bộ lọc điểm đi/điểm đến để xem các chuyến khác.</span>
             </div>
           )}
         </>

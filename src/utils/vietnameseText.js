@@ -156,6 +156,18 @@ const SKIPPED_PAYLOAD_KEYS = new Set([
   'tokenType',
 ]);
 
+function repairMojibakeText(value) {
+  if (typeof value !== 'string' || value.length === 0) {
+    return value;
+  }
+
+  try {
+    return decodeURIComponent(escape(value));
+  } catch {
+    return value;
+  }
+}
+
 export function normalizeVietnameseText(value) {
   if (typeof value !== 'string' || value.length === 0) {
     return value;
@@ -163,7 +175,7 @@ export function normalizeVietnameseText(value) {
 
   const exact = EXACT_TEXT_MAP.get(value);
   if (exact) {
-    return exact;
+    return repairMojibakeText(exact);
   }
 
   let normalized = value;
@@ -172,7 +184,7 @@ export function normalizeVietnameseText(value) {
     normalized = normalized.replace(pattern, replacement);
   });
 
-  return EXACT_TEXT_MAP.get(normalized) ?? normalized;
+  return repairMojibakeText(EXACT_TEXT_MAP.get(normalized) ?? normalized);
 }
 
 export function normalizeVietnameseTextInPayload(payload, key) {

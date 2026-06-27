@@ -83,18 +83,18 @@ function getSeatStateClass(seat) {
 
 function resolveSeatStateLabel(seat) {
   if (Number(seat.status) === 0) {
-    return 'Con trong';
+    return 'Còn trống';
   }
 
   if (Number(seat.bookingStatus) === 1) {
-    return 'Da thanh toan';
+    return 'Đã thanh toán';
   }
 
-  return 'Cho thanh toan';
+  return 'Chờ thanh toán';
 }
 
 function resolveBookingStatusLabel(status) {
-  return Number(status) === 1 ? 'Da thanh toan' : 'Cho thanh toan';
+  return Number(status) === 1 ? 'Đã thanh toán' : 'Chờ thanh toán';
 }
 
 function createEmptyEditForm() {
@@ -155,7 +155,7 @@ function AdminBookingSeatPage() {
 
   useEffect(() => {
     if (!Number.isFinite(tripId)) {
-      setError('Trip id khong hop le.');
+      setError('Trip ID không hợp lệ.');
       setLoading(false);
       return;
     }
@@ -198,7 +198,7 @@ function AdminBookingSeatPage() {
       } catch (loadError) {
         if (!cancelled) {
           setSeatMap(null);
-          setError(loadError.message || 'Khong tai duoc so do ghe admin.');
+          setError(loadError.message || 'Không tải được sơ đồ ghế admin.');
         }
       } finally {
         if (!cancelled) {
@@ -264,7 +264,7 @@ function AdminBookingSeatPage() {
       } catch (loadError) {
         if (!cancelled) {
           setBookingDetail(null);
-          setDetailError(loadError.message || 'Khong tai duoc chi tiet booking.');
+          setDetailError(loadError.message || 'Không tải được chi tiết booking.');
         }
       } finally {
         if (!cancelled) {
@@ -363,31 +363,31 @@ function AdminBookingSeatPage() {
 
   function validateAdminBookingForm({ name, phone, email, paymentExpiryDate, departureTime }) {
     if (!name) {
-      return 'Vui long nhap ten khach dat.';
+      return 'Vui lòng nhập tên khách đặt.';
     }
 
     if (!phone) {
-      return 'Vui long nhap so dien thoai khach dat.';
+      return 'Vui lòng nhập số điện thoại khách đặt.';
     }
 
     if (!email) {
-      return 'Vui long nhap email nhan ve dien tu.';
+      return 'Vui lòng nhập email nhận vé điện tử.';
     }
 
     if (!isValidEmail(email)) {
-      return 'Email nhan ve khong hop le.';
+      return 'Email nhận vé không hợp lệ.';
     }
 
     if (!paymentExpiryDate) {
-      return 'Han thanh toan khong hop le.';
+      return 'Hạn thanh toán không hợp lệ.';
     }
 
     if (paymentExpiryDate.getTime() <= Date.now()) {
-      return 'Han thanh toan phai lon hon thoi diem hien tai.';
+      return 'Hạn thanh toán phải lớn hơn thời điểm hiện tại.';
     }
 
     if (departureTime && !Number.isNaN(departureTime.getTime()) && paymentExpiryDate.getTime() > departureTime.getTime()) {
-      return 'Han thanh toan khong duoc sau gio khoi hanh.';
+      return 'Hạn thanh toán không được sau giờ khởi hành.';
     }
 
     return '';
@@ -425,17 +425,17 @@ function AdminBookingSeatPage() {
     const departureTime = seatMap?.departureTime ? new Date(seatMap.departureTime) : null;
 
     if (selectedSeatIds.length === 0) {
-      setSubmitError('Can chon it nhat mot ghe trong so do.');
+      setSubmitError('Cần chọn ít nhất một ghế trong sơ đồ.');
       return;
     }
 
     if (!selectedPickupId || !selectedDropoffId) {
-      setSubmitError('Can chon day du diem don va diem tra.');
+      setSubmitError('Cần chọn đầy đủ điểm đón và điểm trả.');
       return;
     }
 
     if (selectedPickupId === selectedDropoffId) {
-      setSubmitError('Diem don va diem tra khong duoc giong nhau.');
+      setSubmitError('Điểm đón và điểm trả không được giống nhau.');
       return;
     }
 
@@ -477,7 +477,7 @@ function AdminBookingSeatPage() {
       setPaymentExpiryInput(buildDefaultPaymentExpiryValue(seatMap?.departureTime));
       setRefreshKey((current) => current + 1);
     } catch (submitBookingError) {
-      setSubmitError(submitBookingError.message || 'Khong tao duoc booking guest.');
+      setSubmitError(submitBookingError.message || 'Không tạo được booking guest.');
     } finally {
       setSubmitting(false);
     }
@@ -524,10 +524,10 @@ function AdminBookingSeatPage() {
       setBookingDetail(response);
       setEditForm(buildEditFormFromBooking(response));
       setEditingBooking(false);
-      setAdminActionSuccess(`Da cap nhat booking ${response.bookingCode}.`);
+      setAdminActionSuccess(`Đã cập nhật booking ${response.bookingCode}.`);
       setRefreshKey((current) => current + 1);
     } catch (updateError) {
-      setAdminActionError(updateError.message || 'Khong cap nhat duoc booking.');
+      setAdminActionError(updateError.message || 'Không cập nhật được booking.');
     } finally {
       setAdminActionLoading(false);
     }
@@ -538,7 +538,7 @@ function AdminBookingSeatPage() {
       return;
     }
 
-    const confirmed = window.confirm(`Ban co chac muon huy booking ${bookingDetail.bookingCode} khong?`);
+    const confirmed = window.confirm(`Bạn có chắc muốn hủy booking ${bookingDetail.bookingCode} không?`);
     if (!confirmed) {
       return;
     }
@@ -549,11 +549,11 @@ function AdminBookingSeatPage() {
 
     try {
       const response = await adminApi.cancelBooking(bookingDetail.bookingId);
-      setAdminActionSuccess(response.message || 'Da huy booking thanh cong.');
+      setAdminActionSuccess(response.message || 'Đã hủy booking thành công.');
       resetBookingInspection();
       setRefreshKey((current) => current + 1);
     } catch (cancelError) {
-      setAdminActionError(cancelError.message || 'Khong huy duoc booking.');
+      setAdminActionError(cancelError.message || 'Không hủy được booking.');
     } finally {
       setAdminActionLoading(false);
     }
@@ -565,32 +565,32 @@ function AdminBookingSeatPage() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Booking admin</p>
-            <h3>Chon ghe va tao don cho khach vang lai</h3>
+            <h3>Chọn ghế và tạo đơn cho khách vãng lai</h3>
             <p className="section-note">
-              Nhan vien co the xem ghe da co nguoi giu, phan biet da thanh toan hay chua, sau do tao booking moi cho khach le.
+              Nhân viên có thể xem ghế đã có người giữ, phân biệt đã thanh toán hay chưa, sau đó tạo booking mới cho khách lẻ.
             </p>
           </div>
 
           <div className="admin-booking-toolbar">
             <button type="button" className="ghost-button" onClick={() => navigate('/dat-ve')}>
-              Quay lai lich dat ve
+              Quay lại lịch đặt vé
             </button>
           </div>
         </div>
 
         {loading ? (
           <div className="empty-state-card">
-            <strong>Dang tai so do ghe...</strong>
-            <span>He thong dang lay du lieu ghe va thong tin booking theo tung cho.</span>
+            <strong>Đang tải sơ đồ ghế...</strong>
+            <span>Hệ thống đang lấy dữ liệu ghế và thông tin booking theo từng chỗ.</span>
           </div>
         ) : null}
 
         {error ? (
           <div className="empty-state-card">
-            <strong>Khong tai duoc so do ghe</strong>
+            <strong>Không tải được sơ đồ ghế</strong>
             <span>{error}</span>
             <button type="button" onClick={() => setRefreshKey((current) => current + 1)}>
-              Thu tai lai
+              Thử tải lại
             </button>
           </div>
         ) : null}
@@ -604,22 +604,22 @@ function AdminBookingSeatPage() {
                     {seatMap.routeOrigin} - {seatMap.routeDestination}
                   </div>
                   <div className="admin-seat-meta">
-                    <span>Khoi hanh: {formatDateTime(seatMap.departureTime)}</span>
+                    <span>Khởi hành: {formatDateTime(seatMap.departureTime)}</span>
                     <span>Xe: {seatMap.licensePlate}</span>
-                    <span>Loai: {seatMap.vehicleType}</span>
+                    <span>Loại: {seatMap.vehicleType}</span>
                   </div>
                 </div>
 
                 <div className="admin-seat-summary">
-                  <span>{availableSeatCount} ghe trong</span>
-                  <span>{seatMap.totalSeats} tong ghe</span>
+                  <span>{availableSeatCount} ghế trống</span>
+                  <span>{seatMap.totalSeats} tổng ghế</span>
                 </div>
               </div>
 
               <div className="admin-seat-legend">
-                <span className="legend-chip available">Con trong</span>
-                <span className="legend-chip pending">Cho thanh toan</span>
-                <span className="legend-chip paid">Da thanh toan</span>
+                <span className="legend-chip available">Còn trống</span>
+                <span className="legend-chip pending">Chờ thanh toán</span>
+                <span className="legend-chip paid">Đã thanh toán</span>
               </div>
 
               <div className="admin-deck-switcher">
@@ -675,19 +675,19 @@ function AdminBookingSeatPage() {
                       }))}
                   </div>
                 ) : (
-                  <div className="empty-slot">Khong co ghe nao de hien thi o tang nay.</div>
+                  <div className="empty-slot">Không có ghế nào để hiển thị ở tầng này.</div>
                 )}
               </div>
             </section>
 
             <aside className="admin-booking-sidebar">
               <div className="admin-booking-panel">
-                <h4>Thong tin chang dat</h4>
+                <h4>Thông tin chặng đặt</h4>
                 <div className="schedule-form-grid schedule-form-grid-compact">
                   <label className="filter-field">
-                    <span>Diem don</span>
+                    <span>Điểm đón</span>
                     <select value={selectedPickupId} onChange={(event) => setSelectedPickupId(event.target.value)}>
-                      <option value="">Chon diem don</option>
+                      <option value="">Chọn điểm đón</option>
                       {(seatMap.stops ?? []).map((stop) => (
                         <option
                           key={`pickup-${stop.locationId}`}
@@ -704,9 +704,9 @@ function AdminBookingSeatPage() {
                   </label>
 
                   <label className="filter-field">
-                    <span>Diem tra</span>
+                    <span>Điểm trả</span>
                     <select value={selectedDropoffId} onChange={(event) => setSelectedDropoffId(event.target.value)}>
-                      <option value="">Chon diem tra</option>
+                      <option value="">Chọn điểm trả</option>
                       {(seatMap.stops ?? []).map((stop) => (
                         <option
                           key={`dropoff-${stop.locationId}`}
@@ -725,15 +725,15 @@ function AdminBookingSeatPage() {
 
                 <div className="admin-booking-summary-box">
                   <div>
-                    <span>Don gia chang</span>
-                    <strong>{hasSegmentPrice ? formatCurrency(seatMap.segmentPrice) : 'Chon diem don/tra'}</strong>
+                    <span>Đơn giá chặng</span>
+                    <strong>{hasSegmentPrice ? formatCurrency(seatMap.segmentPrice) : 'Chọn điểm đón/trả'}</strong>
                   </div>
                   <div>
-                    <span>Da chon</span>
-                    <strong>{selectedSeats.length} ghe</strong>
+                    <span>Đã chọn</span>
+                    <strong>{selectedSeats.length} ghế</strong>
                   </div>
                   <div>
-                    <span>Tam tinh</span>
+                    <span>Tạm tính</span>
                     <strong>{hasSegmentPrice ? formatCurrency(selectedTotalAmount) : '--'}</strong>
                   </div>
                 </div>
@@ -746,21 +746,21 @@ function AdminBookingSeatPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="section-note">Chua chon ghe nao.</span>
+                    <span className="section-note">Chưa chọn ghế nào.</span>
                   )}
                 </div>
               </div>
 
               <div className="admin-booking-panel">
                 <h4>
-                  {inspectedSeat ? `Xu ly booking tren ghe ${inspectedSeat.seatCode}` : 'Xu ly ghe da dat'}
+                  {inspectedSeat ? `Xử lý booking trên ghế ${inspectedSeat.seatCode}` : 'Xử lý ghế đã đặt'}
                 </h4>
 
                 {!inspectedSeat ? (
                   <div className="empty-state-card">
-                    <strong>Chon mot ghe da duoc giu cho</strong>
+                    <strong>Chọn một ghế đã được giữ chỗ</strong>
                     <span>
-                      Khi bam vao ghe cho thanh toan, he thong se hien 2 thao tac sua thong tin va huy booking.
+                      Khi bấm vào ghế chờ thanh toán, hệ thống sẽ hiện 2 thao tác sửa thông tin và hủy booking.
                     </span>
                   </div>
                 ) : null}
@@ -769,15 +769,15 @@ function AdminBookingSeatPage() {
                   <div className="form-note">
                     <strong>{inspectedSeat.seatCode}</strong>
                     <span>
-                      Trang thai: {resolveSeatStateLabel(inspectedSeat)}{inspectedSeat.bookingCode ? ` - ${inspectedSeat.bookingCode}` : ''}
+                      Trạng thái: {resolveSeatStateLabel(inspectedSeat)}{inspectedSeat.bookingCode ? ` - ${inspectedSeat.bookingCode}` : ''}
                     </span>
                   </div>
                 ) : null}
 
                 {detailLoading ? (
                   <div className="empty-state-card">
-                    <strong>Dang tai chi tiet booking...</strong>
-                    <span>He thong dang lay thong tin lien he, ghe va han thanh toan cua don nay.</span>
+                    <strong>Đang tải chi tiết booking...</strong>
+                    <span>Hệ thống đang lấy thông tin liên hệ, ghế và hạn thanh toán của đơn này.</span>
                   </div>
                 ) : null}
 
@@ -789,11 +789,11 @@ function AdminBookingSeatPage() {
                   <>
                     <div className="booking-detail-grid">
                       <div>
-                        <span>Khach dat</span>
+                        <span>Khách đặt</span>
                         <strong>{bookingDetail.contactName || '--'}</strong>
                       </div>
                       <div>
-                        <span>So dien thoai</span>
+                        <span>Số điện thoại</span>
                         <strong>{bookingDetail.contactPhone || '--'}</strong>
                       </div>
                       <div>
@@ -801,22 +801,22 @@ function AdminBookingSeatPage() {
                         <strong>{bookingDetail.contactEmail || '--'}</strong>
                       </div>
                       <div>
-                        <span>Trang thai</span>
+                        <span>Trạng thái</span>
                         <strong>{resolveBookingStatusLabel(bookingDetail.status)}</strong>
                       </div>
                       <div>
-                        <span>Ma booking</span>
+                        <span>Mã booking</span>
                         <strong>{bookingDetail.bookingCode || '--'}</strong>
                       </div>
                       <div>
-                        <span>Han thanh toan</span>
+                        <span>Hạn thanh toán</span>
                         <strong>{formatDateTime(bookingDetail.paymentExpiry)}</strong>
                       </div>
                     </div>
 
                     <div className="form-note">
-                      <strong>Chang dat: {bookingDetail.pickupLocationName} - {bookingDetail.dropoffLocationName}</strong>
-                      <span>Khoi hanh: {formatDateTime(bookingDetail.tripDepartureTime)}</span>
+                      <strong>Chặng đặt: {bookingDetail.pickupLocationName} - {bookingDetail.dropoffLocationName}</strong>
+                      <span>Khởi hành: {formatDateTime(bookingDetail.tripDepartureTime)}</span>
                     </div>
 
                     <div className="booking-ticket-pill-row">
@@ -829,7 +829,7 @@ function AdminBookingSeatPage() {
 
                     {bookingDetail.note ? (
                       <div className="form-note">
-                        <strong>Ghi chu</strong>
+                        <strong>Ghi chú</strong>
                         <span>{bookingDetail.note}</span>
                       </div>
                     ) : null}
@@ -847,7 +847,7 @@ function AdminBookingSeatPage() {
                           }}
                           disabled={adminActionLoading}
                         >
-                          Sua thong tin
+                          Sửa thông tin
                         </button>
                         <button
                           type="button"
@@ -855,57 +855,57 @@ function AdminBookingSeatPage() {
                           onClick={handleCancelBooking}
                           disabled={adminActionLoading}
                         >
-                          {adminActionLoading ? 'Dang huy booking...' : 'Xoa / huy booking'}
+                          {adminActionLoading ? 'Đang hủy booking...' : 'Xóa / hủy booking'}
                         </button>
                       </div>
                     ) : null}
 
                     {Number(bookingDetail.status) === 1 ? (
                       <div className="form-note">
-                        <strong>Booking da thanh toan</strong>
-                        <span>Man hinh nay chi cho phep sua hoac huy doi voi booking dang cho thanh toan.</span>
+                        <strong>Booking đã thanh toán</strong>
+                        <span>Màn hình này chỉ cho phép sửa hoặc hủy đối với booking đang chờ thanh toán.</span>
                       </div>
                     ) : null}
 
                     {editingBooking ? (
                       <div className="inline-editor-card">
                         <div className="inline-editor-heading">
-                          <strong>Cap nhat thong tin booking</strong>
+                          <strong>Cập nhật thông tin booking</strong>
                         </div>
 
                         <label className="filter-field">
-                          <span>Ho ten khach dat</span>
+                          <span>Họ tên khách đặt</span>
                           <input
                             className="form-input"
                             value={editForm.contactName}
                             onChange={(event) => setEditForm((current) => ({ ...current, contactName: event.target.value }))}
-                            placeholder="Nhap ho ten"
+                            placeholder="Nhập họ tên"
                           />
                         </label>
 
                         <label className="filter-field">
-                          <span>So dien thoai</span>
+                          <span>Số điện thoại</span>
                           <input
                             className="form-input"
                             value={editForm.contactPhone}
                             onChange={(event) => setEditForm((current) => ({ ...current, contactPhone: event.target.value }))}
-                            placeholder="Nhap so dien thoai"
+                            placeholder="Nhập số điện thoại"
                           />
                         </label>
 
                         <label className="filter-field">
-                          <span>Email nhan ve dien tu</span>
+                          <span>Email nhận vé điện tử</span>
                           <input
                             className="form-input"
                             type="email"
                             value={editForm.contactEmail}
                             onChange={(event) => setEditForm((current) => ({ ...current, contactEmail: event.target.value }))}
-                            placeholder="Nhap email"
+                            placeholder="Nhập email"
                           />
                         </label>
 
                         <label className="filter-field">
-                          <span>Han thanh toan</span>
+                          <span>Hạn thanh toán</span>
                           <input
                             className="form-input"
                             type="datetime-local"
@@ -915,13 +915,13 @@ function AdminBookingSeatPage() {
                         </label>
 
                         <label className="filter-field">
-                          <span>Ghi chu</span>
+                          <span>Ghi chú</span>
                           <textarea
                             className="form-input admin-textarea"
                             rows="4"
                             value={editForm.note}
                             onChange={(event) => setEditForm((current) => ({ ...current, note: event.target.value }))}
-                            placeholder="Cap nhat ghi chu cho nha xe"
+                            placeholder="Cập nhật ghi chú cho nhà xe"
                           />
                         </label>
 
@@ -936,7 +936,7 @@ function AdminBookingSeatPage() {
                             }}
                             disabled={adminActionLoading}
                           >
-                            Huy sua
+                            Hủy sửa
                           </button>
                           <button
                             type="button"
@@ -944,7 +944,7 @@ function AdminBookingSeatPage() {
                             onClick={handleSaveBookingUpdate}
                             disabled={adminActionLoading}
                           >
-                            {adminActionLoading ? 'Dang luu...' : 'Luu thay doi'}
+                            {adminActionLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                           </button>
                         </div>
                       </div>
@@ -954,41 +954,41 @@ function AdminBookingSeatPage() {
               </div>
 
               <form className="admin-booking-panel admin-guest-form" onSubmit={handleCreateBooking}>
-                <h4>Thong tin khach vang lai</h4>
+                <h4>Thông tin khách vãng lai</h4>
 
                 <label className="filter-field">
-                  <span>Ho ten khach dat</span>
+                  <span>Họ tên khách đặt</span>
                   <input
                     className="form-input"
                     value={contactName}
                     onChange={(event) => setContactName(event.target.value)}
-                    placeholder="Nhap ho ten"
+                    placeholder="Nhập họ tên"
                   />
                 </label>
 
                 <label className="filter-field">
-                  <span>So dien thoai</span>
+                  <span>Số điện thoại</span>
                   <input
                     className="form-input"
                     value={contactPhone}
                     onChange={(event) => setContactPhone(event.target.value)}
-                    placeholder="Nhap so dien thoai"
+                    placeholder="Nhập số điện thoại"
                   />
                 </label>
 
                 <label className="filter-field">
-                  <span>Email nhan ve dien tu</span>
+                  <span>Email nhận vé điện tử</span>
                   <input
                     className="form-input"
                     type="email"
                     value={contactEmail}
                     onChange={(event) => setContactEmail(event.target.value)}
-                    placeholder="Nhap email"
+                    placeholder="Nhập email"
                   />
                 </label>
 
                 <label className="filter-field">
-                  <span>Han thanh toan</span>
+                  <span>Hạn thanh toán</span>
                   <input
                     className="form-input"
                     type="datetime-local"
@@ -998,13 +998,13 @@ function AdminBookingSeatPage() {
                 </label>
 
                 <label className="filter-field">
-                  <span>Ghi chu</span>
+                  <span>Ghi chú</span>
                   <textarea
                     className="form-input admin-textarea"
                     rows="4"
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
-                    placeholder="Ghi chu trung chuyen, diem hen..."
+                    placeholder="Ghi chú trung chuyển, điểm hẹn..."
                   />
                 </label>
 
@@ -1012,15 +1012,15 @@ function AdminBookingSeatPage() {
 
                 {bookingResult ? (
                   <div className="success-banner">
-                    <strong>Da tao booking {bookingResult.bookingCode}</strong>
+                    <strong>Đã tạo booking {bookingResult.bookingCode}</strong>
                     <span>
-                      Trang thai: {Number(bookingResult.status) === 1 ? 'Da thanh toan' : 'Cho thanh toan'} - Tong tien {formatCurrency(bookingResult.totalAmount)}
+                      Trạng thái: {Number(bookingResult.status) === 1 ? 'Đã thanh toán' : 'Chờ thanh toán'} - Tổng tiền {formatCurrency(bookingResult.totalAmount)}
                     </span>
                   </div>
                 ) : null}
 
                 <button type="submit" className="auth-submit" disabled={submitting}>
-                  {submitting ? 'Dang tao booking...' : 'Tao booking guest'}
+                  {submitting ? 'Đang tạo booking...' : 'Tạo booking guest'}
                 </button>
               </form>
             </aside>
