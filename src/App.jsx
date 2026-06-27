@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAdminAuth } from './auth/AdminAuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './layouts/AdminLayout';
+import AdminBookingSeatPage from './pages/AdminBookingSeatPage';
 import BookingPage from './pages/BookingPage';
 import DashboardPage from './pages/DashboardPage';
 import FleetPage from './pages/FleetPage';
@@ -29,6 +30,7 @@ function App() {
         <Route index element={<Navigate replace to="/dashboard" />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/dat-ve" element={<BookingPage />} />
+        <Route path="/dat-ve/chuyen/:tripId" element={<AdminBookingSeatPage />} />
         <Route path="/lich-chay" element={<SchedulePage />} />
         <Route path="/tuyen-xe" element={<RoutesPage />} />
         <Route path="/doi-xe" element={<FleetPage />} />

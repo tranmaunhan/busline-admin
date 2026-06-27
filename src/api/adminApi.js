@@ -131,9 +131,25 @@ export const adminAuthApi = {
 
 export const adminApi = {
   getDashboard: ({ signal } = {}) => apiFetch('/admin/dashboard', { signal }),
+  deleteExpiredBookings: ({ signal } = {}) =>
+    apiFetch('/admin/bookings/expired', {
+      method: 'DELETE',
+      signal,
+    }),
   getSchedule: ({ date, originId, destinationId, signal } = {}) =>
     apiFetch('/admin/schedule', {
       params: { date, originId, destinationId },
+      signal,
+    }),
+  getTripBookingSeatMap: (tripId, { pickupLocationId, dropoffLocationId, signal } = {}) =>
+    apiFetch(`/admin/trips/${tripId}/booking-seat-map`, {
+      params: { pickupLocationId, dropoffLocationId },
+      signal,
+    }),
+  createGuestBooking: (payload, { signal } = {}) =>
+    apiFetch('/admin/bookings/guest', {
+      method: 'POST',
+      body: payload,
       signal,
     }),
   getTripSchedules: ({ signal } = {}) => apiFetch('/admin/trip-schedules', { signal }),

@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { adminApi } from '../api/adminApi';
 import { useAdminResource } from '../hooks/useAdminResource';
 import { formatCurrency, formatPercent } from '../utils/adminFormatters';
 
 function DashboardPage() {
+  const [cleanupLoading, setCleanupLoading] = useState(false);
   const { data, loading, error, reload } = useAdminResource(
     (signal) => adminApi.getDashboard({ signal }),
     [],
@@ -13,15 +15,34 @@ function DashboardPage() {
     ? Math.max(...revenueSeries.map((item) => Number(item.value || 0)), 1)
     : 1;
 
+  const handleCleanupExpiredBookings = async () => {
+    try {
+      setCleanupLoading(true);
+      await adminApi.deleteExpiredBookings();
+      await reload();
+    } finally {
+      setCleanupLoading(false);
+    }
+  };
+
   return (
     <div className="page-stack">
       <section className="hero-card">
         <div>
-          <p className="eyebrow">Dashboard vận hành</p>
-          <h3 className="hero-title">Tổng quan doanh thu, vé bán và chuyến xe trong ngày.</h3>
+          <p className="eyebrow">Dashboard van hanh</p>
+          <h3 className="hero-title">Tong quan doanh thu, ve ban va chuyen xe trong ngay.</h3>
           <p className="hero-copy">
-            Dữ liệu được tổng hợp từ booking, trip, route và vehicle hiện có trong hệ thống.
+            Du lieu duoc tong hop tu booking, trip, route va vehicle hien co trong he thong.
           </p>
+          <button
+            type="button"
+            className="clear-filter-button"
+            onClick={handleCleanupExpiredBookings}
+            disabled={cleanupLoading}
+            style={{ marginTop: '1rem' }}
+          >
+            {cleanupLoading ? 'Dang don booking het han...' : 'Xoa booking het han thanh toan'}
+          </button>
         </div>
 
         <div className="hero-metrics">
@@ -37,17 +58,17 @@ function DashboardPage() {
 
       {loading ? (
         <div className="empty-state-card">
-          <strong>Đang tải dashboard...</strong>
-          <span>Hệ thống đang tổng hợp số liệu admin mới nhất.</span>
+          <strong>Dang tai dashboard...</strong>
+          <span>He thong dang tong hop so lieu admin moi nhat.</span>
         </div>
       ) : null}
 
       {error ? (
         <div className="empty-state-card">
-          <strong>Không tải được dashboard</strong>
+          <strong>Khong tai duoc dashboard</strong>
           <span>{error}</span>
           <button type="button" onClick={reload}>
-            Thử tải lại
+            Thu tai lai
           </button>
         </div>
       ) : null}
@@ -69,9 +90,9 @@ function DashboardPage() {
               <div className="section-heading">
                 <div>
                   <p className="eyebrow">Doanh thu</p>
-                  <h3>Biểu đồ doanh thu 7 ngày gần nhất</h3>
+                  <h3>Bieu do doanh thu 7 ngay gan nhat</h3>
                 </div>
-                <div className="section-note">Cập nhật: {data.updatedAtLabel}</div>
+                <div className="section-note">Cap nhat: {data.updatedAtLabel}</div>
               </div>
 
               <div className="chart-card">
@@ -93,8 +114,8 @@ function DashboardPage() {
             <article className="data-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Tuyến nổi bật</p>
-                  <h3>Các tuyến đang có tốc độ bán vé cao</h3>
+                  <p className="eyebrow">Tuyen noi bat</p>
+                  <h3>Cac tuyen dang co toc do ban ve cao</h3>
                 </div>
               </div>
 
@@ -105,7 +126,7 @@ function DashboardPage() {
                       <strong>{route.name}</strong>
                       <span className="pill">{formatPercent(route.occupancyRate)}</span>
                     </div>
-                    <span>{route.tickets} vé</span>
+                    <span>{route.tickets} ve</span>
                     <small>Doanh thu {formatCurrency(route.revenue)}</small>
                   </li>
                 ))}
@@ -117,8 +138,8 @@ function DashboardPage() {
             <article className="data-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Chuyến xe sắp khởi hành</p>
-                  <h3>Danh sách ưu tiên theo dõi trong 90 phút tới</h3>
+                  <p className="eyebrow">Chuyen xe sap khoi hanh</p>
+                  <h3>Danh sach uu tien theo doi trong 90 phut toi</h3>
                 </div>
               </div>
 
@@ -126,13 +147,13 @@ function DashboardPage() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Mã chuyến</th>
-                      <th>Tuyến</th>
-                      <th>Giờ xuất bến</th>
-                      <th>Bến/Ghi chú</th>
-                      <th>Ghế đã giữ</th>
-                      <th>Tài xế</th>
-                      <th>Trạng thái</th>
+                      <th>Ma chuyen</th>
+                      <th>Tuyen</th>
+                      <th>Gio xuat ben</th>
+                      <th>Ben/Ghi chu</th>
+                      <th>Ghe da giu</th>
+                      <th>Tai xe</th>
+                      <th>Trang thai</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -159,8 +180,8 @@ function DashboardPage() {
             <article className="data-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Booking mới nhất</p>
-                  <h3>Đơn đặt vé vừa được tạo trong hệ thống</h3>
+                  <p className="eyebrow">Booking moi nhat</p>
+                  <h3>Don dat ve vua duoc tao trong he thong</h3>
                 </div>
               </div>
 
@@ -168,13 +189,13 @@ function DashboardPage() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Mã đơn</th>
-                      <th>Khách hàng</th>
-                      <th>Tuyến</th>
-                      <th>Số ghế</th>
-                      <th>Số tiền</th>
-                      <th>Thanh toán</th>
-                      <th>Thời gian</th>
+                      <th>Ma don</th>
+                      <th>Khach hang</th>
+                      <th>Tuyen</th>
+                      <th>So ghe</th>
+                      <th>So tien</th>
+                      <th>Thanh toan</th>
+                      <th>Thoi gian</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -201,8 +222,8 @@ function DashboardPage() {
             <article className="data-card">
               <div className="section-heading">
                 <div>
-                  <p className="eyebrow">Cảnh báo hệ thống</p>
-                  <h3>Những mục cần theo dõi trong ca trực</h3>
+                  <p className="eyebrow">Canh bao he thong</p>
+                  <h3>Nhung muc can theo doi trong ca truc</h3>
                 </div>
               </div>
 
