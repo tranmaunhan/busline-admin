@@ -23,6 +23,7 @@ function SchedulePage() {
   const [scheduleError, setScheduleError] = useState('');
   const [generateError, setGenerateError] = useState('');
   const [lastGeneration, setLastGeneration] = useState(null);
+  const [singleGenerateDates, setSingleGenerateDates] = useState({});
 
   const { data, loading, error, reload } = useAdminResource(
     (signal) => adminApi.getTripSchedules({ signal }),
@@ -45,6 +46,26 @@ function SchedulePage() {
     setScheduleFeedback(location.state.feedbackMessage);
     navigate(location.pathname, { replace: true, state: null });
   }, [location.pathname, location.state, navigate]);
+
+  useEffect(() => {
+    if (!tripSchedules.length) {
+      return;
+    }
+
+    setSingleGenerateDates((current) => {
+      const next = { ...current };
+      let changed = false;
+
+      tripSchedules.forEach((schedule) => {
+        if (!next[schedule.id]) {
+          next[schedule.id] = getLocalDateValue();
+          changed = true;
+        }
+      });
+
+      return changed ? next : current;
+    });
+  }, [tripSchedules]);
 
   async function handleDeleteSchedule(schedule) {
     const confirmed = window.confirm(`Ban co chac muon xoa lich #${schedule.id} khong?`);
@@ -233,11 +254,24 @@ function SchedulePage() {
                               Sua thong tin
                             </button>
 
+                            <label className="filter-field schedule-inline-date">
+                              <span>Ngay can sinh</span>
+                              <input
+                                className="form-input"
+                                type="date"
+                                value={singleGenerateDates[schedule.id] ?? getLocalDateValue()}
+                                onChange={(event) => setSingleGenerateDates((current) => ({
+                                  ...current,
+                                  [schedule.id]: event.target.value,
+                                }))}
+                              />
+                            </label>
+
                             <button
                               type="button"
                               onClick={() => handleGenerate({
-                                fromDate: generateForm.fromDate,
-                                toDate: generateForm.fromDate,
+                                fromDate: singleGenerateDates[schedule.id] ?? getLocalDateValue(),
+                                toDate: singleGenerateDates[schedule.id] ?? getLocalDateValue(),
                                 scheduleIds: [schedule.id],
                               })}
                               disabled={generating}

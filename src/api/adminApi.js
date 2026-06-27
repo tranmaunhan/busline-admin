@@ -168,6 +168,7 @@ export const adminApi = {
       signal,
     }),
   getTripSchedules: ({ signal } = {}) => apiFetch('/admin/trip-schedules', { signal }),
+  getTripSchedule: (scheduleId, { signal } = {}) => apiFetch(`/admin/trip-schedules/${scheduleId}`, { signal }),
   createTripSchedule: (payload, { signal } = {}) =>
     apiFetch('/admin/trip-schedules', {
       method: 'POST',

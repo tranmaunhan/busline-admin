@@ -23,22 +23,13 @@ function ScheduleEditorPage() {
 
   const { data, loading, error, reload } = useAdminResource(
     async (signal) => {
-      const [tripSchedules, routesPayload, fleetPayload] = await Promise.all([
-        adminApi.getTripSchedules({ signal }),
+      const [selectedSchedule, routesPayload, fleetPayload] = await Promise.all([
+        isEditing ? adminApi.getTripSchedule(scheduleId, { signal }) : Promise.resolve(null),
         adminApi.getRoutes({ signal }),
         adminApi.getFleet({ signal }),
       ]);
 
-      const selectedSchedule = isEditing
-        ? tripSchedules.find((schedule) => Number(schedule.id) === scheduleId) ?? null
-        : null;
-
-      if (isEditing && !selectedSchedule) {
-        throw new Error(`Khong tim thay lich chay voi id = ${scheduleId}`);
-      }
-
       return {
-        tripSchedules,
         routesPayload,
         fleetPayload,
         selectedSchedule,
