@@ -263,7 +263,6 @@ function TripTimetableBrowser({
         <div>
           <p className="eyebrow">{eyebrow}</p>
           <h3>{title}</h3>
-          <p className="section-note">{description}</p>
         </div>
       </div>
 

@@ -344,10 +344,13 @@ select {
   color: var(--accent);
   display: inline-flex;
   flex: 0 0 42px;
-  font-size: 0.8rem;
-  font-weight: 800;
   height: 42px;
   justify-content: center;
+}
+
+.nav-svg-icon {
+  height: 1.05rem;
+  width: 1.05rem;
 }
 
 .nav-item-label {
@@ -397,6 +400,10 @@ select {
 
 .sidebar-user-card .logout-button {
   width: 100%;
+}
+
+.app-shell.sidebar-collapsed .logout-button {
+  padding-inline: 0;
 }
 
 .main-content,

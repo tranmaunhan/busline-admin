@@ -566,9 +566,6 @@ function AdminBookingSeatPage() {
           <div>
             <p className="eyebrow">Booking admin</p>
             <h3>Chọn ghế và tạo đơn cho khách vãng lai</h3>
-            <p className="section-note">
-              Nhân viên có thể xem ghế đã có người giữ, phân biệt đã thanh toán hay chưa, sau đó tạo booking mới cho khách lẻ.
-            </p>
           </div>
 
           <div className="admin-booking-toolbar">

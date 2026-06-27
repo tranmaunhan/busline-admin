@@ -141,9 +141,6 @@ function ScheduleEditorPage() {
           <div>
             <p className="eyebrow">{isEditing ? 'Chỉnh sửa lịch' : 'Tạo lịch mới'}</p>
             <h3>{isEditing ? 'Cập nhật thông tin lịch chạy' : 'Tạo lịch chạy mẫu mới'}</h3>
-            <p className="section-note">
-              Chọn tuyến, xe, giờ khởi hành và khoảng hiệu lực. Mọi thông tin được load sẵn từ cơ sở dữ liệu để admin chọn nhanh.
-            </p>
           </div>
 
           <div className="editor-actions">

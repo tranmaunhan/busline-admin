@@ -61,9 +61,6 @@ function RoutesPage() {
           <div>
             <p className="eyebrow">Tuyến xe</p>
             <h3>Danh mục tuyến đang khai thác</h3>
-            <p className="section-note">
-              Phần tạo mới và chỉnh sửa đã được tách sang trang riêng. Chỉ các tuyến chưa gắn vào lịch chạy hoặc trip mới được sửa và xóa.
-            </p>
           </div>
 
           <div className="editor-actions">

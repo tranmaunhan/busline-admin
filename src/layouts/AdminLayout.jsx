@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../auth/AdminAuthContext';
+import { CollapseIcon, ExpandIcon, LogoutIcon } from '../components/AdminIcons';
 import { navItems } from '../data/adminData';
 
 const SIDEBAR_STORAGE_KEY = 'adminSidebarCollapsed';
@@ -39,14 +40,7 @@ function AdminLayout() {
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <p className="eyebrow">Busline Admin</p>
-            {!isSidebarCollapsed ? (
-              <>
-                <h1>Điều hành nhà xe</h1>
-                <p className="sidebar-copy">
-                  Thanh điều hướng luôn cố định bên trái để thao tác nhanh hơn khi cuộn và quản trị.
-                </p>
-              </>
-            ) : null}
+            {!isSidebarCollapsed ? <h1>Điều hành</h1> : null}
           </div>
 
           <button
@@ -56,22 +50,28 @@ function AdminLayout() {
             aria-label={isSidebarCollapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
             title={isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn'}
           >
-            {isSidebarCollapsed ? '»' : '«'}
+            {isSidebarCollapsed ? <ExpandIcon className="nav-svg-icon" /> : <CollapseIcon className="nav-svg-icon" />}
           </button>
         </div>
 
         <nav className="nav-list">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-              to={item.to}
-              title={item.label}
-            >
-              <span className="nav-item-icon">{item.shortLabel}</span>
-              {!isSidebarCollapsed ? <span className="nav-item-label">{item.label}</span> : null}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
+            return (
+              <NavLink
+                key={item.to}
+                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                to={item.to}
+                title={item.label}
+              >
+                <span className="nav-item-icon">
+                  <Icon />
+                </span>
+                {!isSidebarCollapsed ? <span className="nav-item-label">{item.label}</span> : null}
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="sidebar-user-card">
@@ -94,7 +94,7 @@ function AdminLayout() {
             }}
             title="Đăng xuất"
           >
-            {isSidebarCollapsed ? '⎋' : 'Đăng xuất'}
+            {isSidebarCollapsed ? <LogoutIcon className="nav-svg-icon" /> : 'Đăng xuất'}
           </button>
         </div>
       </aside>
@@ -102,8 +102,8 @@ function AdminLayout() {
       <main className="main-content">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Phòng điều hành</p>
-            <h2>{activeNavItem.title}</h2>
+            <p className="eyebrow">Busline Admin</p>
+            <h2>{activeNavItem.label}</h2>
           </div>
 
           <div className="topbar-actions">

@@ -307,9 +307,6 @@ function RouteEditorPage() {
           <div>
             <p className="eyebrow">{isEditing ? 'Chỉnh sửa tuyến' : 'Tạo tuyến mới'}</p>
             <h3>{isEditing ? 'Cập nhật thông tin tuyến xe' : 'Khai báo tuyến, điểm dừng và bảng giá'}</h3>
-            <p className="section-note">
-              Chỉ được sửa hoặc xóa khi tuyến chưa được gắn vào lịch chạy hoặc phát sinh trip.
-            </p>
           </div>
 
           <div className="editor-actions">

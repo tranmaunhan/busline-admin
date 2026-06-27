@@ -104,9 +104,6 @@ function FleetEditorPage() {
           <div>
             <p className="eyebrow">{isEditing ? 'Chỉnh sửa xe' : 'Thêm xe mới'}</p>
             <h3>{isEditing ? 'Cập nhật phương tiện' : 'Thêm phương tiện vào đội xe'}</h3>
-            <p className="section-note">
-              Giao diện tạo và chỉnh sửa được tách riêng để màn hình danh sách gọn hơn khi thao tác.
-            </p>
           </div>
 
           <div className="editor-actions">

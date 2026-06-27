@@ -112,9 +112,6 @@ function SchedulePage() {
           <div>
             <p className="eyebrow">Lịch chạy</p>
             <h3>Thời khóa biểu lịch chạy mẫu</h3>
-            <p className="section-note">
-              Xem nhanh lịch theo khung giờ, chọn sửa để cập nhật thông tin lịch hoặc xóa lịch không còn sử dụng.
-            </p>
           </div>
 
           <div className="editor-actions">

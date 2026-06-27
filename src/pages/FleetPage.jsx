@@ -61,9 +61,6 @@ function FleetPage() {
           <div>
             <p className="eyebrow">Đội xe</p>
             <h3>Danh sách phương tiện đang quản lý</h3>
-            <p className="section-note">
-              Màn hình danh sách chỉ giữ các thao tác cần thiết. Phần thêm và chỉnh sửa đã được tách ra trang riêng để thao tác gọn hơn.
-            </p>
           </div>
 
           <div className="editor-actions">
