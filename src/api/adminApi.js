@@ -146,6 +146,21 @@ export const adminApi = {
       params: { pickupLocationId, dropoffLocationId },
       signal,
     }),
+  getBookingDetail: (bookingId, { signal } = {}) =>
+    apiFetch(`/admin/bookings/${bookingId}`, {
+      signal,
+    }),
+  updateBooking: (bookingId, payload, { signal } = {}) =>
+    apiFetch(`/admin/bookings/${bookingId}`, {
+      method: 'PUT',
+      body: payload,
+      signal,
+    }),
+  cancelBooking: (bookingId, { signal } = {}) =>
+    apiFetch(`/admin/bookings/${bookingId}`, {
+      method: 'DELETE',
+      signal,
+    }),
   createGuestBooking: (payload, { signal } = {}) =>
     apiFetch('/admin/bookings/guest', {
       method: 'POST',

@@ -1237,6 +1237,39 @@ th {
   gap: 1rem;
 }
 
+.booking-detail-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.booking-detail-grid div {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 16px;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+}
+
+.booking-detail-grid span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.booking-detail-grid strong {
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+.booking-ticket-pill-row,
+.admin-booking-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
 .admin-seat-header,
 .admin-seat-summary,
 .admin-seat-meta {
@@ -1496,6 +1529,7 @@ th {
   .content-grid,
   .schedule-workspace,
   .admin-booking-summary-box,
+  .booking-detail-grid,
   .chart-card,
   .timetable-grid,
   .timetable-grid.full-width,
