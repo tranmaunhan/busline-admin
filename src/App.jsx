@@ -9,6 +9,7 @@ import FleetPage from './pages/FleetPage';
 import LoginPage from './pages/LoginPage';
 import RoutesPage from './pages/RoutesPage';
 import SchedulePage from './pages/SchedulePage';
+import ScheduleEditorPage from './pages/ScheduleEditorPage';
 import StaffPage from './pages/StaffPage';
 
 function App() {
@@ -32,6 +33,8 @@ function App() {
         <Route path="/dat-ve" element={<BookingPage />} />
         <Route path="/dat-ve/chuyen/:tripId" element={<AdminBookingSeatPage />} />
         <Route path="/lich-chay" element={<SchedulePage />} />
+        <Route path="/lich-chay/tao-moi" element={<ScheduleEditorPage />} />
+        <Route path="/lich-chay/:scheduleId/chinh-sua" element={<ScheduleEditorPage />} />
         <Route path="/tuyen-xe" element={<RoutesPage />} />
         <Route path="/doi-xe" element={<FleetPage />} />
         <Route path="/nhan-su" element={<StaffPage />} />
