@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../auth/AdminAuthContext';
+import AdminBrandLogo from '../components/AdminBrandLogo';
 import { CollapseIcon, ExpandIcon, LogoutIcon } from '../components/AdminIcons';
 import { navItems } from '../data/adminData';
 
@@ -12,7 +13,10 @@ function getInitials(fullName) {
   }
 
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
-  const initials = parts.slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('');
+  const initials = parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('');
   return initials || 'AD';
 }
 
@@ -25,7 +29,10 @@ function AdminLayout() {
   );
 
   useEffect(() => {
-    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, isSidebarCollapsed ? '1' : '0');
+    window.localStorage.setItem(
+      SIDEBAR_STORAGE_KEY,
+      isSidebarCollapsed ? '1' : '0',
+    );
   }, [isSidebarCollapsed]);
 
   const primaryRole = user?.roles?.[0] ?? 'ADMIN';
@@ -44,18 +51,28 @@ function AdminLayout() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <p className="eyebrow">Busline Admin</p>
-            {!isSidebarCollapsed ? <h1>Điều hành</h1> : null}
+            <AdminBrandLogo
+              compact={isSidebarCollapsed}
+              subtitle={isSidebarCollapsed ? '' : 'Bảng điều hành'}
+            />
           </div>
 
           <button
             type="button"
             className="sidebar-toggle"
             onClick={() => setIsSidebarCollapsed((current) => !current)}
-            aria-label={isSidebarCollapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+            aria-label={
+              isSidebarCollapsed
+                ? 'Mở rộng thanh điều hướng'
+                : 'Thu gọn thanh điều hướng'
+            }
             title={isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn'}
           >
-            {isSidebarCollapsed ? <ExpandIcon className="nav-svg-icon" /> : <CollapseIcon className="nav-svg-icon" />}
+            {isSidebarCollapsed ? (
+              <ExpandIcon className="nav-svg-icon" />
+            ) : (
+              <CollapseIcon className="nav-svg-icon" />
+            )}
           </button>
         </div>
 
@@ -73,7 +90,9 @@ function AdminLayout() {
                 <span className="nav-item-icon">
                   <Icon />
                 </span>
-                {!isSidebarCollapsed ? <span className="nav-item-label">{item.label}</span> : null}
+                {!isSidebarCollapsed ? (
+                  <span className="nav-item-label">{item.label}</span>
+                ) : null}
               </NavLink>
             );
           })}
@@ -82,8 +101,8 @@ function AdminLayout() {
 
       <main className="main-content">
         <header className="topbar">
-          <div>
-            <p className="eyebrow">Busline Admin</p>
+          <div className="topbar-heading">
+            <p className="eyebrow">SaiGonST Admin</p>
             <h2>{activeNavItem.label}</h2>
           </div>
 

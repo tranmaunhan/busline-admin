@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '../auth/AdminAuthContext';
+import AdminBrandLogo from '../components/AdminBrandLogo';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -16,9 +17,11 @@ function LoginPage() {
     return (
       <div className="auth-shell">
         <div className="auth-card compact">
-          <p className="eyebrow">Busline Admin</p>
+          <AdminBrandLogo subtitle="Hệ thống quản trị" />
           <h1>Đang khởi tạo phiên admin</h1>
-          <p className="auth-copy">Hệ thống đang kiểm tra trạng thái đăng nhập hiện tại.</p>
+          <p className="auth-copy">
+            Hệ thống đang kiểm tra trạng thái đăng nhập hiện tại.
+          </p>
         </div>
       </div>
     );
@@ -47,10 +50,11 @@ function LoginPage() {
     <div className="auth-shell">
       <div className="auth-card">
         <div className="auth-hero">
-          <p className="eyebrow">Busline Admin</p>
+          <AdminBrandLogo subtitle="Hệ thống quản trị" />
           <h1>Đăng nhập trang quản trị</h1>
           <p className="auth-copy">
-            Sử dụng tài khoản có quyền ADMIN hoặc STAFF để truy cập dashboard vận hành.
+            Sử dụng tài khoản có quyền ADMIN hoặc STAFF để truy cập dashboard
+            vận hành.
           </p>
         </div>
 
@@ -62,7 +66,9 @@ function LoginPage() {
               autoComplete="username"
               placeholder="admin@busline.vn"
               value={form.email}
-              onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, email: event.target.value }))
+              }
               required
             />
           </label>
@@ -74,7 +80,12 @@ function LoginPage() {
               autoComplete="current-password"
               placeholder="Nhập mật khẩu"
               value={form.password}
-              onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  password: event.target.value,
+                }))
+              }
               required
             />
           </label>

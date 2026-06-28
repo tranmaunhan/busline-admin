@@ -12,6 +12,44 @@ const CHART_PADDING = {
   left: 72,
 };
 
+function normalizeLabel(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+}
+
+function isCurrencyMetric(label) {
+  const normalizedLabel = normalizeLabel(label);
+  return (
+    normalizedLabel.includes('doanh thu')
+    || normalizedLabel.includes('tong gia tri')
+    || normalizedLabel.includes('gia tri booking')
+    || normalizedLabel.includes('tong tien')
+    || normalizedLabel.includes('vnd')
+  );
+}
+
+function formatDashboardMetricValue(label, value) {
+  if (value === null || value === undefined || value === '') {
+    return '--';
+  }
+
+  if (!isCurrencyMetric(label)) {
+    return value;
+  }
+
+  const numericValue = Number(
+    typeof value === 'string' ? value.replace(/[^\d.-]/g, '') : value,
+  );
+
+  if (Number.isNaN(numericValue)) {
+    return value;
+  }
+
+  return formatCurrency(numericValue);
+}
+
 function buildYAxisTicks(maxValue) {
   const safeMax = Math.max(Number(maxValue || 0), 0);
   if (safeMax <= 0) {
@@ -235,25 +273,13 @@ function DashboardPage() {
         <div>
           <p className="eyebrow">Dashboard vận hành</p>
           <h3 className="hero-title">Tổng quan doanh thu, vé bán và chuyến xe trong ngày.</h3>
-          <p className="hero-copy">
-            Dữ liệu được tổng hợp từ booking, trip, route và vehicle hiện có trong hệ thống.
-          </p>
-          <button
-            type="button"
-            className="clear-filter-button"
-            onClick={handleCleanupExpiredBookings}
-            disabled={cleanupLoading}
-            style={{ marginTop: '1rem' }}
-          >
-            {cleanupLoading ? 'Đang dọn booking hết hạn...' : 'Xóa booking hết hạn thanh toán'}
-          </button>
         </div>
 
         <div className="hero-metrics">
           {(data?.overviewStats ?? []).map((item) => (
             <div key={item.label}>
               <span>{item.label}</span>
-              <strong>{item.value}</strong>
+              <strong>{formatDashboardMetricValue(item.label, item.value)}</strong>
               <p>{item.caption}</p>
             </div>
           ))}
@@ -283,7 +309,7 @@ function DashboardPage() {
             {data.metricCards.map((card) => (
               <article className={`stat-card tone-${card.tone}`} key={card.label}>
                 <span>{card.label}</span>
-                <strong>{card.value}</strong>
+                <strong>{formatDashboardMetricValue(card.label, card.value)}</strong>
                 <p>{card.detail}</p>
               </article>
             ))}
