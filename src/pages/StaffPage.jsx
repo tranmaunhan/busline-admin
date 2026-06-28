@@ -53,19 +53,6 @@ function StaffPage() {
             </ul>
           </article>
 
-          <article className="data-card">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">Ghi chú dữ liệu</p>
-                <h3>Phạm vi dữ liệu nhân sự hiện tại</h3>
-              </div>
-            </div>
-
-            <div className="empty-state-card">
-              <strong>Trạng thái hiện tại</strong>
-              <span>{data.note}</span>
-            </div>
-          </article>
         </>
       ) : null}
     </div>

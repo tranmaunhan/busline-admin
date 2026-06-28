@@ -34,7 +34,7 @@ export const navItems = [
     to: '/doi-xe',
   },
   {
-    label: 'Nhân sự',
+    label: 'Người dùng',
     icon: StaffIcon,
     to: '/nhan-su',
   },
