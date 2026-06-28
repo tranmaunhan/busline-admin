@@ -565,7 +565,7 @@ function AdminBookingSeatPage() {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Booking admin</p>
-            <h3>Chọn ghế và tạo đơn cho khách vãng lai</h3>
+            <h3>Chọn ghế và tạo đơn cho khách đặt qua tổng đài</h3>
           </div>
 
           <div className="admin-booking-toolbar">
@@ -752,15 +752,6 @@ function AdminBookingSeatPage() {
                 <h4>
                   {inspectedSeat ? `Xử lý booking trên ghế ${inspectedSeat.seatCode}` : 'Xử lý ghế đã đặt'}
                 </h4>
-
-                {!inspectedSeat ? (
-                  <div className="empty-state-card">
-                    <strong>Chọn một ghế đã được giữ chỗ</strong>
-                    <span>
-                      Khi bấm vào ghế chờ thanh toán, hệ thống sẽ hiện 2 thao tác sửa thông tin và hủy booking.
-                    </span>
-                  </div>
-                ) : null}
 
                 {inspectedSeat ? (
                   <div className="form-note">
@@ -951,7 +942,7 @@ function AdminBookingSeatPage() {
               </div>
 
               <form className="admin-booking-panel admin-guest-form" onSubmit={handleCreateBooking}>
-                <h4>Thông tin khách vãng lai</h4>
+                <h4>Thông tin khách</h4>
 
                 <label className="filter-field">
                   <span>Họ tên khách đặt</span>
@@ -984,7 +975,10 @@ function AdminBookingSeatPage() {
                   />
                 </label>
 
-                <label className="filter-field">
+                <label
+                  className="filter-field"
+                  style={{ display: 'none' }}
+                >
                   <span>Hạn thanh toán</span>
                   <input
                     className="form-input"
@@ -995,7 +989,7 @@ function AdminBookingSeatPage() {
                 </label>
 
                 <label className="filter-field">
-                  <span>Ghi chú</span>
+                  <span>Ghi chú Trung Chuyển</span>
                   <textarea
                     className="form-input admin-textarea"
                     rows="4"

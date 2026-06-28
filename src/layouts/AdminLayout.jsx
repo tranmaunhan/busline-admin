@@ -34,6 +34,11 @@ function AdminLayout() {
     [location.pathname],
   );
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <div className={`app-shell${isSidebarCollapsed ? ' sidebar-collapsed' : ''}`}>
       <aside className="sidebar">
@@ -73,30 +78,6 @@ function AdminLayout() {
             );
           })}
         </nav>
-
-        <div className="sidebar-user-card">
-          <div className="sidebar-user-avatar">{getInitials(user?.fullName)}</div>
-
-          {!isSidebarCollapsed ? (
-            <div className="sidebar-user-meta">
-              <strong>{user?.fullName || 'Admin'}</strong>
-              <span>{user?.email || 'Chưa có email'}</span>
-              <small>{primaryRole}</small>
-            </div>
-          ) : null}
-
-          <button
-            type="button"
-            className="logout-button"
-            onClick={() => {
-              logout();
-              navigate('/login', { replace: true });
-            }}
-            title="Đăng xuất"
-          >
-            {isSidebarCollapsed ? <LogoutIcon className="nav-svg-icon" /> : 'Đăng xuất'}
-          </button>
-        </div>
       </aside>
 
       <main className="main-content">
@@ -107,10 +88,25 @@ function AdminLayout() {
           </div>
 
           <div className="topbar-actions">
-            <div className="topbar-user-badge">
-              <strong>{user?.fullName || 'Admin'}</strong>
-              <span>{primaryRole}</span>
+            <div className="topbar-user-panel">
+              <div className="topbar-user-avatar">{getInitials(user?.fullName)}</div>
+
+              <div className="topbar-user-badge">
+                <strong>{user?.fullName || 'Admin'}</strong>
+                <span>{user?.email || 'Chưa có email'}</span>
+                <small>{primaryRole}</small>
+              </div>
             </div>
+
+            <button
+              type="button"
+              className="logout-button topbar-logout-button"
+              onClick={handleLogout}
+              title="Đăng xuất"
+            >
+              <LogoutIcon className="nav-svg-icon" />
+              <span>Đăng xuất</span>
+            </button>
           </div>
         </header>
 

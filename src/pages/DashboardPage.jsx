@@ -1,7 +1,216 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { adminApi } from '../api/adminApi';
 import { useAdminResource } from '../hooks/useAdminResource';
-import { formatCurrency, formatPercent } from '../utils/adminFormatters';
+import { formatCompactCurrency, formatCurrency, formatPercent } from '../utils/adminFormatters';
+
+const CHART_WIDTH = 760;
+const CHART_HEIGHT = 320;
+const CHART_PADDING = {
+  top: 24,
+  right: 18,
+  bottom: 48,
+  left: 72,
+};
+
+function buildYAxisTicks(maxValue) {
+  const safeMax = Math.max(Number(maxValue || 0), 0);
+  if (safeMax <= 0) {
+    return [0, 1];
+  }
+
+  const intervals = 5;
+  const roughStep = safeMax / intervals;
+  const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+  const normalized = roughStep / magnitude;
+
+  let niceStep;
+  if (normalized <= 1) {
+    niceStep = 1;
+  } else if (normalized <= 2) {
+    niceStep = 2;
+  } else if (normalized <= 2.5) {
+    niceStep = 2.5;
+  } else if (normalized <= 5) {
+    niceStep = 5;
+  } else {
+    niceStep = 10;
+  }
+
+  const step = niceStep * magnitude;
+  const top = step * intervals;
+
+  return Array.from({ length: intervals + 1 }, (_, index) => index * step);
+}
+
+function RevenueBarChart({ series, updatedAtLabel }) {
+  const [hoveredBar, setHoveredBar] = useState(null);
+
+  const totalRevenue = useMemo(
+    () => series.reduce((sum, item) => sum + Number(item.value || 0), 0),
+    [series],
+  );
+
+  const averageRevenue = series.length ? totalRevenue / series.length : 0;
+  const peakRevenue = series.length
+    ? series.reduce((max, item) => (Number(item.value || 0) > Number(max.value || 0) ? item : max), series[0])
+    : null;
+
+  const yAxisTicks = useMemo(
+    () => buildYAxisTicks(Math.max(...series.map((item) => Number(item.value || 0)), 0)),
+    [series],
+  );
+  const chartMax = yAxisTicks[yAxisTicks.length - 1] || 1;
+  const plotWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
+  const plotHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
+  const slotWidth = plotWidth / Math.max(series.length, 1);
+  const barWidth = Math.min(54, slotWidth * 0.56);
+
+  if (!series.length) {
+    return (
+      <div className="chart-empty-state">
+        <strong>Chưa có dữ liệu doanh thu</strong>
+        <span>Biểu đồ sẽ hiển thị khi hệ thống có dữ liệu tổng hợp theo ngày.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="chart-shell">
+      <div className="chart-summary-row">
+        <div className="chart-summary-card">
+          <span>Tổng doanh thu 7 ngày</span>
+          <strong>{formatCurrency(totalRevenue)}</strong>
+          <small>Trung bình {formatCurrency(averageRevenue)} / ngày</small>
+        </div>
+
+        <div className="chart-summary-card subtle">
+          <span>Ngày doanh thu cao nhất</span>
+          <strong>{peakRevenue?.label || '--'}</strong>
+          <small>{peakRevenue ? formatCurrency(peakRevenue.value) : 'Chưa có dữ liệu'}</small>
+        </div>
+
+        <div className="section-note">Cập nhật: {updatedAtLabel}</div>
+      </div>
+
+      <div
+        className="revenue-chart-wrap"
+        onMouseLeave={() => setHoveredBar(null)}
+      >
+        {hoveredBar ? (
+          <div
+            className="revenue-chart-tooltip"
+            style={{
+              left: `${hoveredBar.left}%`,
+              top: `${hoveredBar.top}%`,
+            }}
+          >
+            <strong>{hoveredBar.label}</strong>
+            <span>{formatCurrency(hoveredBar.value)}</span>
+          </div>
+        ) : null}
+
+        <svg
+          className="revenue-chart-svg"
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          role="img"
+          aria-label="Biểu đồ cột doanh thu 7 ngày gần nhất"
+        >
+          <defs>
+            <linearGradient id="revenueBarGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#fb923c" />
+              <stop offset="100%" stopColor="#f97316" />
+            </linearGradient>
+          </defs>
+
+          {yAxisTicks.map((tick) => {
+            const y =
+              CHART_PADDING.top + plotHeight - (tick / chartMax) * plotHeight;
+
+            return (
+              <g key={tick}>
+                <line
+                  className="revenue-chart-grid"
+                  x1={CHART_PADDING.left}
+                  x2={CHART_WIDTH - CHART_PADDING.right}
+                  y1={y}
+                  y2={y}
+                />
+                <text
+                  className="revenue-chart-axis-label"
+                  x={CHART_PADDING.left - 12}
+                  y={y + 4}
+                  textAnchor="end"
+                >
+                  {formatCompactCurrency(tick)}
+                </text>
+              </g>
+            );
+          })}
+
+          <line
+            className="revenue-chart-axis"
+            x1={CHART_PADDING.left}
+            x2={CHART_PADDING.left}
+            y1={CHART_PADDING.top}
+            y2={CHART_PADDING.top + plotHeight}
+          />
+          <line
+            className="revenue-chart-axis"
+            x1={CHART_PADDING.left}
+            x2={CHART_WIDTH - CHART_PADDING.right}
+            y1={CHART_PADDING.top + plotHeight}
+            y2={CHART_PADDING.top + plotHeight}
+          />
+
+          {series.map((item, index) => {
+            const value = Number(item.value || 0);
+            const height = value > 0 ? Math.max((value / chartMax) * plotHeight, 10) : 0;
+            const x = CHART_PADDING.left + slotWidth * index + (slotWidth - barWidth) / 2;
+            const y = CHART_PADDING.top + plotHeight - height;
+            const centerX = x + barWidth / 2;
+
+            return (
+              <g key={item.label}>
+                <rect
+                  className="revenue-chart-bar"
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={height}
+                  rx="14"
+                  ry="14"
+                />
+                <rect
+                  className="revenue-chart-hitbox"
+                  x={x - Math.max((slotWidth - barWidth) / 2, 8)}
+                  y={CHART_PADDING.top}
+                  width={barWidth + Math.max(slotWidth - barWidth, 16)}
+                  height={plotHeight}
+                  onMouseEnter={() =>
+                    setHoveredBar({
+                      label: item.label,
+                      value,
+                      left: (centerX / CHART_WIDTH) * 100,
+                      top: (Math.max(y - 18, CHART_PADDING.top + 16) / CHART_HEIGHT) * 100,
+                    })
+                  }
+                />
+                <text
+                  className="revenue-chart-x-label"
+                  x={centerX}
+                  y={CHART_PADDING.top + plotHeight + 24}
+                  textAnchor="middle"
+                >
+                  {item.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
 
 function DashboardPage() {
   const [cleanupLoading, setCleanupLoading] = useState(false);
@@ -9,11 +218,6 @@ function DashboardPage() {
     (signal) => adminApi.getDashboard({ signal }),
     [],
   );
-
-  const revenueSeries = data?.revenueSeries ?? [];
-  const maxRevenue = revenueSeries.length
-    ? Math.max(...revenueSeries.map((item) => Number(item.value || 0)), 1)
-    : 1;
 
   const handleCleanupExpiredBookings = async () => {
     try {
@@ -92,23 +296,12 @@ function DashboardPage() {
                   <p className="eyebrow">Doanh thu</p>
                   <h3>Biểu đồ doanh thu 7 ngày gần nhất</h3>
                 </div>
-                <div className="section-note">Cập nhật: {data.updatedAtLabel}</div>
               </div>
 
-              <div className="chart-card">
-                {data.revenueSeries.map((item) => (
-                  <div className="chart-column" key={item.label}>
-                    <span className="chart-value">{formatCurrency(item.value)}</span>
-                    <div className="chart-bar-track">
-                      <div
-                        className="chart-bar"
-                        style={{ height: `${Math.max((Number(item.value || 0) / maxRevenue) * 100, 18)}%` }}
-                      />
-                    </div>
-                    <span className="chart-label">{item.label}</span>
-                  </div>
-                ))}
-              </div>
+              <RevenueBarChart
+                series={data.revenueSeries}
+                updatedAtLabel={data.updatedAtLabel}
+              />
             </article>
 
             <article className="data-card">
