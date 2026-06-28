@@ -5,7 +5,7 @@ function AdminBrandLogo({
   return (
     <div className={`brand-logo${compact ? ' compact' : ''}`}>
       <div className="brand-logo-mark" aria-hidden="true">
-        <span>SG</span>
+        <img src="/favicon.svg" alt="" />
       </div>
 
       <div className="brand-logo-copy">

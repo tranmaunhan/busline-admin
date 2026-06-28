@@ -269,21 +269,17 @@ select {
 
 .brand-logo-mark {
   align-items: center;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  border-radius: 18px;
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18);
-  color: #ffffff;
   display: inline-flex;
   flex: 0 0 48px;
   height: 48px;
   justify-content: center;
-  letter-spacing: 0.08em;
   width: 48px;
 }
 
-.brand-logo-mark span {
-  font-size: 0.94rem;
-  font-weight: 800;
+.brand-logo-mark img {
+  display: block;
+  height: 48px;
+  width: 48px;
 }
 
 .brand-logo-copy {
