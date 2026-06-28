@@ -424,7 +424,7 @@ function TripTimetableBrowser({
                                 {isExpired ? (
                                   <>
                                     <LockIcon />
-                                    Đã qua giờ
+                                    Đã xuất bến
                                   </>
                                 ) : (
                                   `${trip.emptySeats} ghế trống`
@@ -471,7 +471,7 @@ function TripTimetableBrowser({
                                 handleSelectTrip();
                               }}
                             >
-                              {isExpired ? 'Không thể đặt chuyến đã qua giờ' : isSoldOut ? 'Hết ghế' : 'Chọn chuyến'}
+                              {isExpired ? ' Đã xuất bến' : isSoldOut ? 'Hết ghế' : 'Chọn chuyến'}
                             </button>
                           </article>
                         );
